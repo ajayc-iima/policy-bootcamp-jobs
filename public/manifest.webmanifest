@@ -1,0 +1,10 @@
+{
+  "name": "Policy Bootcamp Job Portal",
+  "short_name": "PB Jobs",
+  "description": "Job board for Policy Bootcamp delegates & alumni — Rishihood University",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fff8ed",
+  "theme_color": "#0f1f3a",
+  "icons": []
+}

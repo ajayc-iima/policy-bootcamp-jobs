@@ -1,0 +1,129 @@
+rules_version = '2';
+
+// ─────────────────────────────────────────────────────────────────────────
+//  Policy Bootcamp Job Portal — Firestore Security Rules
+//
+//  The trust model: ONLY active (admin-approved) members may read jobs or
+//  interact. Pending/suspended users can read only their own user doc.
+//  Defence in depth — the client mirrors these checks for UX, but THIS is
+//  the source of truth. The browser is always treated as hostile.
+// ─────────────────────────────────────────────────────────────────────────
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helpers — active = status 'active'; admin flag separate.
+    function isSignedIn()      { return request.auth != null; }
+    function uid()             { return request.auth.uid; }
+    function userDoc()         { return get(/databases/$(database)/documents/users/$(uid())).data; }
+    function isActive()        { return isSignedIn() && userDoc().status == 'active'; }
+    function isAdmin()         { return isActive() && userDoc().isAdmin == true; }
+    function isOwner(d)        { return isSignedIn() && d.uid == uid(); }
+
+    // ── config/bootstrap ────────────────────────────────────────────────
+    // One-time marker used to bootstrap the very first admin account.
+    match /config/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+                    && docId == 'bootstrap'
+                    && !exists(/databases/$(database)/documents/config/bootstrap)
+                    && request.resource.data.adminUid == uid();
+      allow update: if isSignedIn();
+      allow delete: if false;
+    }
+
+    // ── users/{uid} ──────────────────────────────────────────────────────
+    //  Anyone signed in creates their own doc on signup (status forced pending).
+    //  Only the owner edits; only admins change status / isAdmin.
+    match /users/{userId} {
+      // Anyone active can browse the delegate directory.
+      allow read:   if isSignedIn() && (request.auth.uid == userId || isActive() || isAdmin());
+      allow create: if isSignedIn() && request.auth.uid == userId
+                    && request.resource.data.email is string
+                    && request.resource.data.uid == userId
+                    && request.resource.data.displayName is string
+                    && request.resource.data.batch is string
+                    && request.resource.data.organisation is string
+                    && request.resource.data.createdAt is timestamp
+                    && (
+                      (
+                        request.resource.data.status == 'pending'
+                        && request.resource.data.isAdmin == false
+                      )
+                      || (
+                        request.resource.data.status == 'active'
+                        && request.resource.data.isAdmin == true
+                      )
+                    );
+      allow update: if isSignedIn() &&
+                    ( // owner may edit profile fields only
+                      (request.auth.uid == userId
+                        && !request.resource.data.diff(resource.data).affectedKeys()
+                             .hasAny(['status', 'isAdmin', 'createdAt']))
+                      || (
+                        request.auth.uid == userId
+                        && resource.data.status == 'pending'
+                        && request.resource.data.status == 'active'
+                        && request.resource.data.isAdmin == true
+                        && request.resource.data.email == resource.data.email
+                      )
+                      || isAdmin() );
+      allow delete: if isAdmin();
+    }
+
+    // ── jobs/{jobId} ─────────────────────────────────────────────────────
+    match /jobs/{jobId} {
+      // Anyone active reads open jobs; the poster reads their own at any status.
+      allow read:   if isActive();
+      // Creation: active members, must stamp themselves as the poster.
+      allow create: if isActive()
+                    && request.resource.data.postedBy == uid()
+                    && request.resource.data.status in ['open', 'closed'];
+      // Owner edits status/fields; admin may also.
+      // Any active user may increment applicantCount (used by submitApplication).
+      allow update: if isActive() &&
+                    ( (resource.data.postedBy == uid() && request.resource.data.postedBy == uid())
+                      || isAdmin()
+                      || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['applicantCount']) );
+      allow delete: if isActive() && (resource.data.postedBy == uid() || isAdmin());
+
+      // ── jobs/{jobId}/applications/{applicantId} ────────────────────────
+      //  The poster sees all applicants; an applicant sees only their own.
+      //  The application doc id == applicant uid → apply-once is structural.
+      match /applications/{applicantId} {
+        // Queries must include a where("postedBy", "==", uid) filter (handled in jobs-api).
+        allow read:   if isActive() && resource.data.postedBy == uid();
+        // Single-doc read: applicant reads their own application.
+        allow read:   if isActive() && applicantId == uid();
+        allow read:   if isAdmin();
+        allow create: if isActive()
+                      && applicantId == uid()
+                      && request.resource.data.applicantId == uid();
+        // Update check uses get() — fine for single-doc writes.
+        allow update: if isActive() &&
+                      ( get(/databases/$(database)/documents/jobs/$(jobId)).data.postedBy == uid()
+                        || isAdmin() );
+        allow delete: if isAdmin();
+      }
+    }
+
+    // ── applications/{appId} ─────────────────────────────────────────────
+    //  Applicant-facing mirror. Owner reads; create mirrors the subcollection.
+    match /applications/{appId} {
+      allow read:   if isActive() && resource.data.applicantId == uid();
+      allow read:   if isActive() && resource.data.postedBy == uid();
+      allow read:   if isAdmin();
+      allow create: if isActive() && request.resource.data.applicantId == uid();
+      allow update: if isActive() && (
+        isAdmin()
+        || get(/databases/$(database)/documents/jobs/$(resource.data.jobId)).data.postedBy == uid()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Deny everything else by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

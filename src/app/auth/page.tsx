@@ -104,7 +104,7 @@ function AuthPageInner() {
 
       <p className="mt-8 text-center text-xs text-navy-400">
         <span className="inline-flex items-center gap-1 justify-center">
-          <Sparkle width={12} height={12} /> Policy Bootcamp 2026 · Rastram School of Public Leadership
+          <Sparkle width={12} height={12} /> Policy Bootcamp 2026 · Rashtram School of Public Leadership
         </span>
       </p>
     </AuthShell>

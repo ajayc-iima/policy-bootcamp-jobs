@@ -113,7 +113,7 @@ export default function ProfilePage() {
       </Card>
 
       <p className="text-center text-xs text-navy-300 mt-6">
-        Policy Bootcamp 2026 · Rastram School of Public Leadership
+        Policy Bootcamp 2026 · Rashtram School of Public Leadership
       </p>
     </AppShell>
   );

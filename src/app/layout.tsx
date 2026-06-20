@@ -9,7 +9,7 @@ const fraunces = Fraunces({ subsets: ["latin"], display: "swap", variable: "--fo
 
 export const metadata: Metadata = {
   title: "Policy Bootcamp Job Portal",
-  description: "Exclusive job board for Policy Bootcamp delegates & alumni — Rastram School of Public Leadership, Rishihood University.",
+  description: "Exclusive job board for Policy Bootcamp delegates & alumni — Rashtram School of Public Leadership, Rishihood University.",
   applicationName: "Policy Bootcamp Jobs",
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, statusBarStyle: "default", title: "PB Jobs" },

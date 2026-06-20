@@ -46,7 +46,7 @@ export function Navbar() {
             <span className="grid place-items-center h-8 w-8 rounded-lg bg-gradient-to-br from-saffron-500 to-saffron-600 text-white font-bold text-sm shadow-elevation-1 group-hover:shadow-elevation-2 transition-shadow">PB</span>
             <div className="leading-tight">
               <p className="text-sm font-semibold text-navy-900">Policy Bootcamp</p>
-              <p className="text-[10px] text-navy-400 -mt-0.5">Job Portal · Rastram</p>
+              <p className="text-[10px] text-navy-400 -mt-0.5">Job Portal · Rashtram</p>
             </div>
           </Link>
 

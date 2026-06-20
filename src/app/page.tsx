@@ -54,7 +54,7 @@ export default function LandingPage() {
           <div className="max-w-lg mx-auto w-full text-center">
             {/* Floating badge */}
             <div className="inline-flex items-center gap-1.5 rounded-full bg-white border border-saffron-200 px-3.5 py-1.5 text-xs font-medium text-saffron-700 mb-6 shadow-elevation-1 animate-float">
-              <Sparkle width={13} height={13} /> Policy Bootcamp 2026 · Rastram
+              <Sparkle width={13} height={13} /> Policy Bootcamp 2026 · Rashtram
             </div>
 
             <h1 className="font-display text-4xl sm:text-5xl font-semibold text-navy-900 leading-[1.1] tracking-tight">
@@ -146,7 +146,7 @@ export default function LandingPage() {
       </main>
 
       <footer className="px-5 py-6 text-center text-xs text-navy-400 border-t border-navy-100">
-        <p>Rastram School of Public Leadership · Rishihood University</p>
+        <p>Rashtram School of Public Leadership · Rishihood University</p>
         <p className="mt-1 text-navy-300">Built for Policy Bootcamp 2026</p>
       </footer>
     </div>

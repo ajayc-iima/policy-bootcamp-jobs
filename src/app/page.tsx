@@ -51,7 +51,7 @@ export default function LandingPage() {
               <img src="/logo.webp" alt="Policy BootCamp" className="h-9 w-auto max-w-[200px] object-contain" />
             </span>
           </div>
-          <Link href="/auth" className="text-sm font-semibold text-white/80 hover:text-white transition-colors px-3 py-1.5 rounded-full hover:bg-white/10">Sign in</Link>
+          <Link href="/auth" className="text-sm font-semibold text-white/80 hover:text-white transition-colors px-4 py-2 rounded-full hover:bg-white/10">Sign in</Link>
         </header>
 
         <div className="relative z-10 px-5 sm:px-8 pt-10 sm:pt-16 pb-16 sm:pb-20 max-w-2xl mx-auto w-full text-center">

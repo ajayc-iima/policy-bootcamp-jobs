@@ -7,20 +7,20 @@ type Variant = "primary" | "secondary" | "ghost" | "danger" | "outline";
 type Size = "sm" | "md" | "lg";
 
 const base =
-  "inline-flex items-center justify-center gap-2 font-semibold rounded-xl transition-all duration-200 focus-ring disabled:opacity-50 disabled:pointer-events-none active:scale-[0.97] select-none";
+  "inline-flex items-center justify-center gap-2.5 font-semibold rounded-2xl transition-all duration-200 focus-ring disabled:opacity-50 disabled:pointer-events-none active:scale-[0.97] select-none";
 
 const variants: Record<Variant, string> = {
-  primary: "bg-gradient-to-br from-saffron-400 to-saffron-600 text-white hover:from-saffron-500 hover:to-saffron-700 shadow-elevation-1 hover:shadow-glow-saffron",
+  primary: "bg-gradient-to-br from-saffron-400 to-saffron-600 text-white hover:from-saffron-500 hover:to-saffron-700 shadow-elevation-2 hover:shadow-glow-saffron hover:scale-[1.02]",
   secondary: "bg-gradient-to-br from-navy-800 to-navy-900 text-white hover:to-navy-950 shadow-elevation-2 hover:shadow-glow-navy",
   ghost: "text-navy-700 hover:bg-navy-100 hover:text-navy-900",
   danger: "bg-gradient-to-br from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 shadow-elevation-1",
-  outline: "border-2 border-navy-200 bg-white text-navy-800 hover:border-navy-900 hover:bg-navy-50",
+  outline: "border-2 border-navy-300 bg-white text-navy-800 hover:border-navy-900 hover:bg-navy-50 shadow-elevation-1",
 };
 
 const sizes: Record<Size, string> = {
-  sm: "h-9 px-4 text-sm",
-  md: "h-11 px-5 text-sm",
-  lg: "h-13 px-7 text-base",
+  sm: "h-10 px-5 text-sm",
+  md: "h-12 px-6 text-sm",
+  lg: "h-14 px-8 text-base",
 };
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

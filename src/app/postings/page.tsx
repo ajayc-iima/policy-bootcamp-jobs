@@ -36,13 +36,11 @@ export default function MyPostingsPage() {
   const toggleStatus = async (job: Job) => {
     const next: JobStatus = job.status === "open" ? "closed" : "open";
     const prev = job.status;
-    // Optimistic update
     setJobs((j) => j.map((x) => (x.id === job.id ? { ...x, status: next } : x)));
     try {
       await updateJobStatus(job.id, next);
       toast(`Job ${next === "open" ? "reopened" : "closed"}`, "success");
     } catch {
-      // Rollback
       setJobs((j) => j.map((x) => (x.id === job.id ? { ...x, status: prev } : x)));
       toast("Failed to update job status", "error");
     }
@@ -51,13 +49,11 @@ export default function MyPostingsPage() {
   const remove = async (job: Job) => {
     if (!confirm(`Delete "${job.title}"? This cannot be undone.`)) return;
     const prev = [...jobs];
-    // Optimistic remove
     setJobs((j) => j.filter((x) => x.id !== job.id));
     try {
       await deleteJob(job.id);
       toast("Job deleted", "success");
     } catch {
-      // Rollback
       setJobs(prev);
       toast("Failed to delete job", "error");
     }
@@ -65,13 +61,17 @@ export default function MyPostingsPage() {
 
   return (
     <AppShell>
-      <div className="flex items-center justify-between mb-3">
+      <div className="gradient-hero rounded-2xl p-5 mb-5 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-navy-900">My postings</h1>
-          <p className="text-xs text-navy-400">{jobs.length} {jobs.length === 1 ? "job" : "jobs"} you&apos;ve posted</p>
+          <h1 className="font-display text-display-sm text-white">My postings</h1>
+          <p className="text-sm text-navy-200 mt-1">
+            <span className="font-bold text-saffron-400">{jobs.length}</span> {jobs.length === 1 ? "job" : "jobs"} you&apos;ve posted
+          </p>
         </div>
         <Link href="/post">
-          <Button size="sm"><Plus width={16} height={16} /> New</Button>
+          <Button size="sm" className="bg-white/15 text-white border-white/20 hover:bg-white/25 font-bold">
+            <Plus width={16} height={16} /> New
+          </Button>
         </Link>
       </div>
 
@@ -91,32 +91,32 @@ export default function MyPostingsPage() {
       ) : jobs.length === 0 ? (
         <EmptyState icon={<Briefcase width={36} height={36} />}
                     title="No jobs posted yet"
-                    description="Share a role with the Policy Bootcamp network."
+                    description="Share a role with the Policy BootCamp network."
                     action={<Link href="/post"><Button size="sm">Post your first job</Button></Link>} />
       ) : (
         <div className="space-y-3">
           {jobs.map((job) => (
-            <Card key={job.id}>
-              <div className="p-4">
+            <Card key={job.id} accent={job.status === "open" ? "green" : "none"} interactive>
+              <div className="p-4 pl-5">
                 <div className="flex items-start justify-between gap-3">
                   <Link href={`/jobs/${job.id}`} className="min-w-0 flex-1">
-                    <h3 className="font-semibold text-navy-900 truncate">{job.title}</h3>
+                    <h3 className="font-bold text-navy-900 truncate text-[15px]">{job.title}</h3>
                     <p className="text-sm text-navy-500 truncate">{job.organisation} · {timeAgo(job.createdAt)}</p>
                   </Link>
-                  <Badge tone={job.status === "open" ? "green" : "gray"}>
+                  <Badge tone={job.status === "open" ? "green" : "gray"} dot>
                     {job.status === "open" ? "Open" : "Closed"}
                   </Badge>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Link href={`/postings/${job.id}/applicants`}>
-                    <Button size="sm" variant="outline">
+                    <Button size="sm" variant="outline" className="font-bold">
                       <Inbox width={14} height={14} /> View{counts[job.id] !== undefined ? ` (${counts[job.id]})` : ""}
                     </Button>
                   </Link>
-                  <Button size="sm" variant="ghost" onClick={() => toggleStatus(job)}>
+                  <Button size="sm" variant="ghost" onClick={() => toggleStatus(job)} className="font-semibold">
                     {job.status === "open" ? "Close" : "Reopen"}
                   </Button>
-                  <Button size="sm" variant="ghost" className="text-red-600 hover:bg-red-50" onClick={() => remove(job)}>
+                  <Button size="sm" variant="ghost" className="text-red-600 hover:bg-red-50 font-semibold" onClick={() => remove(job)}>
                     Delete
                   </Button>
                 </div>

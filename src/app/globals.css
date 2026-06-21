@@ -15,8 +15,9 @@ body {
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* Bolder, more visible focus ring — accessibility for the revamp. */
 .focus-ring {
-  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-saffron-500 focus-visible:ring-offset-2;
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-saffron-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white;
 }
 
 .prose-job {
@@ -25,6 +26,46 @@ body {
 
 .safe-bottom-nav {
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ── Reusable component helpers (kill duplication across pages) ────────── */
+@layer components {
+  /* A bold surface tile: card with rounded-2xl + soft border + shadow. */
+  .tile {
+    @apply rounded-2xl bg-white border border-navy-100 shadow-elevation-1;
+  }
+
+  /* Filter / status pill chip. Pair with .chip-active for the filled state. */
+  .chip {
+    @apply whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-semibold border transition-all duration-150
+           bg-white text-navy-600 border-navy-200 hover:border-navy-300 hover:text-navy-800;
+  }
+  .chip-active {
+    @apply bg-navy-900 text-white border-navy-900 shadow-elevation-1;
+  }
+  .chip-active-saffron {
+    @apply bg-saffron-500 text-white border-saffron-500 shadow-glow-saffron;
+  }
+
+  /* A coloured left accent bar, used on bold cards. */
+  .accent-bar {
+    @apply absolute left-0 top-5 bottom-5 w-1 rounded-r-full;
+  }
+
+  /* A full-bleed gradient band for hero / CTA sections. */
+  .gradient-hero {
+    background:
+      radial-gradient(120% 120% at 80% 0%, rgba(255,122,13,.28) 0%, rgba(255,122,13,0) 45%),
+      radial-gradient(100% 120% at 10% 100%, rgba(14,165,164,.22) 0%, rgba(14,165,164,0) 50%),
+      linear-gradient(135deg, #0b1220 0%, #1a2b47 60%, #2c4267 100%);
+  }
+  .gradient-saffron {
+    background: linear-gradient(135deg, #ff9a33 0%, #ff7a0d 50%, #f05e06 100%);
+  }
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(120deg, #ff9a33 0%, #ff7a0d 55%, #c74607 100%);
+  }
 }
 
 /* Smooth page transitions */

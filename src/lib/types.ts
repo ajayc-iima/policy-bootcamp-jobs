@@ -6,7 +6,7 @@ export interface AppUser {
   uid: string;
   email: string;
   displayName: string;
-  /** Policy Bootcamp batch, e.g. "2024", "2025". */
+  /** Policy BootCamp batch, e.g. "2024", "2025". */
   batch: string;
   /** Current organisation / affiliation. */
   organisation: string;

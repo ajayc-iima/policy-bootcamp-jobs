@@ -8,9 +8,9 @@ const inter = Inter({ subsets: ["latin"], display: "swap", variable: "--font-int
 const fraunces = Fraunces({ subsets: ["latin"], display: "swap", variable: "--font-display", weight: ["600", "700"] });
 
 export const metadata: Metadata = {
-  title: "Policy Bootcamp Job Portal",
-  description: "Exclusive job board for Policy Bootcamp delegates & alumni — Rashtram School of Public Leadership, Rishihood University.",
-  applicationName: "Policy Bootcamp Jobs",
+  title: "Policy BootCamp Job Portal",
+  description: "Exclusive job board for Policy BootCamp delegates & alumni — Rashtram School of Public Leadership, Rishihood University.",
+  applicationName: "Policy BootCamp Jobs",
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, statusBarStyle: "default", title: "PB Jobs" },
 };

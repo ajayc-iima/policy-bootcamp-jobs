@@ -11,6 +11,23 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+/**
+ * Fail loudly at dev time if the Firebase env vars are missing, instead of
+ * letting the SDK initialise with `undefined` and throw an opaque error deep
+ * inside Firestore later.
+ */
+if (process.env.NODE_ENV !== "production") {
+  const missing = Object.entries(firebaseConfig)
+    .filter(([, v]) => !v)
+    .map(([k]) => k);
+  if (missing.length) {
+    throw new Error(
+      `[firebase] Missing env var${missing.length > 1 ? "s" : ""}: ${missing.join(", ")}.\n` +
+      `Copy .env.example to .env.local and fill in the values from your Firebase project settings.`,
+    );
+  }
+}
+
 export const app: FirebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
 export const auth: Auth = getAuth(app);
 export const db: Firestore = getFirestore(app);

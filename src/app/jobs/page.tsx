@@ -48,31 +48,35 @@ export default function JobsPage() {
 
   return (
     <AppShell>
-      <div className="flex items-center justify-between mb-3">
-        <div>
-          <h1 className="text-xl font-semibold text-navy-900">Open roles</h1>
-          <p className="text-xs text-navy-400">{jobs.length} live {jobs.length === 1 ? "job" : "jobs"} in the network</p>
+      {/* Bold header band */}
+      <div className="gradient-hero rounded-2xl p-5 mb-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="font-display text-display-sm text-white">Open roles</h1>
+            <p className="text-sm text-navy-200 mt-1">
+              <span className="font-bold text-saffron-400">{jobs.length}</span> live {jobs.length === 1 ? "job" : "jobs"} in the network
+            </p>
+          </div>
+          <Link href="/post" className="sm:hidden">
+            <span className="inline-flex items-center gap-1 rounded-full bg-saffron-500 text-white text-xs font-bold px-4 py-2.5 shadow-glow-saffron active:scale-95 transition-transform">
+              <Plus width={14} height={14} /> Post
+            </span>
+          </Link>
         </div>
-        <Link href="/post" className="sm:hidden">
-          <span className="inline-flex items-center gap-1 rounded-full bg-saffron-500 text-white text-xs font-medium px-3 py-2 shadow">
-            <Plus width={14} height={14} /> Post
-          </span>
-        </Link>
       </div>
 
       {/* Search */}
-      <div className="relative mb-3">
+      <div className="relative mb-4">
         <Search width={18} height={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-navy-300" />
         <Input placeholder="Search role, org, location…" value={search}
                onChange={(e) => setSearch(e.target.value)} className="pl-10" />
       </div>
 
-      {/* Type chips */}
-      <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 mb-4 -mx-4 px-4">
+      {/* Pill filter chips — active = saffron fill */}
+      <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 mb-5 -mx-4 px-4">
         {TYPES.map((t) => (
           <button key={t} onClick={() => setFilter(t)}
-                  className={cn("whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-medium border transition-colors",
-                    filter === t ? "bg-navy-900 text-white border-navy-900" : "bg-white text-navy-600 border-navy-200")}>
+                  className={cn("chip", filter === t && "chip-active-saffron")}>
             {t}
           </button>
         ))}
@@ -87,9 +91,9 @@ export default function JobsPage() {
           icon={<Briefcase width={36} height={36} />}
           title={jobs.length === 0 ? "No jobs yet" : "No matches"}
           description={jobs.length === 0
-            ? "Be the first to post a role for the Policy Bootcamp network."
+            ? "Be the first to post a role for the Policy BootCamp network."
             : "Try a different search or filter."}
-          action={jobs.length === 0 ? <Link href="/post"><span className="text-saffron-700 font-medium text-sm">Post the first job →</span></Link> : undefined}
+          action={jobs.length === 0 ? <Link href="/post"><span className="text-saffron-700 font-bold text-sm">Post the first job →</span></Link> : undefined}
         />
       ) : (
         <div className="space-y-3">

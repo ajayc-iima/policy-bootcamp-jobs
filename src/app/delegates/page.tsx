@@ -10,6 +10,20 @@ import { Users, Search } from "@/components/icons";
 import { fetchActiveUsers } from "@/lib/users-api";
 import type { AppUser } from "@/lib/types";
 
+const avatarColors = [
+  "from-saffron-500 to-saffron-600",
+  "from-teal-500 to-teal-600",
+  "from-navy-700 to-navy-800",
+  "from-green-500 to-green-600",
+  "from-amber-500 to-amber-600",
+];
+
+function getAvatarColor(uid: string) {
+  let hash = 0;
+  for (let i = 0; i < uid.length; i++) hash = ((hash << 5) - hash + uid.charCodeAt(i)) | 0;
+  return avatarColors[Math.abs(hash) % avatarColors.length];
+}
+
 export default function DelegatesPage() {
   const [users, setUsers] = useState<AppUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,9 +48,9 @@ export default function DelegatesPage() {
 
   return (
     <AppShell>
-      <div className="mb-3">
-        <h1 className="text-xl font-semibold text-navy-900">Delegates</h1>
-        <p className="text-xs text-navy-400">Connect with the Policy Bootcamp network</p>
+      <div className="gradient-hero rounded-2xl p-5 mb-5">
+        <h1 className="font-display text-display-sm text-white">Delegates</h1>
+        <p className="text-sm text-navy-200 mt-1">Connect with the Policy BootCamp network</p>
       </div>
 
       <div className="relative mb-4">
@@ -50,7 +64,7 @@ export default function DelegatesPage() {
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="rounded-2xl bg-white border border-navy-100 p-4 animate-pulse">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-navy-100" />
+                <div className="h-12 w-12 rounded-xl bg-navy-100" />
                 <div className="flex-1">
                   <div className="h-4 w-1/3 bg-navy-100 rounded" />
                   <div className="h-3 w-1/2 bg-navy-100 rounded mt-1.5" />
@@ -71,19 +85,20 @@ export default function DelegatesPage() {
         <div className="space-y-2">
           {filtered.map((u) => (
             <Link key={u.uid} href={`/delegates/${u.uid}`} className="block animate-fade-in">
-              <Card className="hover:border-saffron-300 hover:shadow-elevation-2 transition-all duration-200">
-                <div className="p-4">
+              <Card accent="saffron" interactive>
+                <div className="p-4 pl-5">
                   <div className="flex items-center gap-3">
-                    <span className="grid place-items-center h-10 w-10 rounded-full bg-gradient-to-br from-navy-800 to-navy-900 text-white text-sm font-semibold shrink-0">
+                    {/* Colored avatar tile */}
+                    <span className={`grid place-items-center h-12 w-12 rounded-xl bg-gradient-to-br ${getAvatarColor(u.uid)} text-white text-sm font-bold shadow-elevation-1 shrink-0`}>
                       {u.displayName[0]?.toUpperCase() ?? "?"}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-navy-900 truncate">{u.displayName}</p>
-                      <p className="text-xs text-navy-500 truncate">{u.organisation} · Batch {u.batch}</p>
+                      <p className="font-bold text-navy-900 truncate text-[15px]">{u.displayName}</p>
+                      <p className="text-xs text-navy-500 truncate font-medium">{u.organisation} · Batch {u.batch}</p>
                     </div>
                   </div>
                   {u.bio && (
-                    <p className="mt-2 text-sm text-navy-600 line-clamp-2">{u.bio}</p>
+                    <p className="mt-2.5 text-sm text-navy-600 line-clamp-2 ml-[60px]">{u.bio}</p>
                   )}
                 </div>
               </Card>

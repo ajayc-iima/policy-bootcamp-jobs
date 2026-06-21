@@ -40,6 +40,9 @@ export const ArrowRight = (p: P) => (
 export const ChevronRight = (p: P) => (
   <svg {...base(p)}><path d="m9 18 6-6-6-6" /></svg>
 );
+export const ChevronDown = (p: P) => (
+  <svg {...base(p)}><path d="m6 9 6 6 6-6" /></svg>
+);
 export const ExternalLink = (p: P) => (
   <svg {...base(p)}><path d="M15 3h6v6" /><path d="M10 14 21 3" /><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /></svg>
 );
@@ -57,4 +60,28 @@ export const Users = (p: P) => (
 );
 export const Sparkle = (p: P) => (
   <svg {...base(p)}><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8" /></svg>
+);
+export const Building = (p: P) => (
+  <svg {...base(p)}><rect x="4" y="3" width="16" height="18" rx="1.5" /><path d="M9 7h0M15 7h0M9 11h0M15 11h0M9 15h0M15 15h0" /><path d="M10 21v-3h4v3" /></svg>
+);
+export const Globe = (p: P) => (
+  <svg {...base(p)}><circle cx="12" cy="12" r="9" /><path d="M3 12h18" /><path d="M12 3c2.5 2.5 3.5 6 3.5 9s-1 6.5-3.5 9c-2.5-2.5-3.5-6-3.5-9s1-6.5 3.5-9Z" /></svg>
+);
+export const Mail = (p: P) => (
+  <svg {...base(p)}><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>
+);
+export const Calendar = (p: P) => (
+  <svg {...base(p)}><rect x="3" y="4" width="18" height="17" rx="2" /><path d="M3 9h18M8 2v4M16 2v4" /></svg>
+);
+export const Trash = (p: P) => (
+  <svg {...base(p)}><path d="M4 7h16M10 11v6M14 11v6M5 7l1 13a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-13M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3" /></svg>
+);
+export const Link = (p: P) => (
+  <svg {...base(p)}><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1" /><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1" /></svg>
+);
+export const X = (p: P) => (
+  <svg {...base(p)}><path d="M18 6 6 18M6 6l12 12" /></svg>
+);
+export const TrendUp = (p: P) => (
+  <svg {...base(p)}><path d="M3 17l6-6 4 4 8-8" /><path d="M14 7h7v7" /></svg>
 );

@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
-import { Logout, Shield } from "@/components/icons";
+import { Logout, Shield, Mail, Globe } from "@/components/icons";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
 import { firebaseError } from "@/lib/firebase-errors";
@@ -49,7 +49,6 @@ export default function ProfilePage() {
         bio: form.bio.trim(),
         contactLink: form.contactLink.trim(),
       });
-      // Keep the auth context in sync so the header/avatars reflect changes.
       await refreshProfile();
       setMsg({ ok: true, text: "Profile updated" });
     } catch (err) {
@@ -66,23 +65,33 @@ export default function ProfilePage() {
 
   return (
     <AppShell>
-      <div className="flex items-center gap-3 mb-5">
-        <span className="grid place-items-center h-14 w-14 rounded-full bg-navy-900 text-white text-xl font-semibold">
-          {profile.displayName?.[0]?.toUpperCase()}
-        </span>
-        <div className="min-w-0">
-          <h1 className="font-semibold text-navy-900 truncate">{profile.displayName}</h1>
-          <p className="text-sm text-navy-500 truncate">{profile.email}</p>
-          <div className="mt-1 flex items-center gap-1.5">
-            {profile.status === "active" ? <Badge tone="green">Verified</Badge> : profile.status === "rejected" ? <Badge tone="gray">Rejected</Badge> : <Badge tone="amber">{profile.status}</Badge>}
-            {profile.isAdmin && <Badge tone="saffron"><Shield width={11} height={11} /> Admin</Badge>}
+      {/* Banner header */}
+      <div className="gradient-hero rounded-2xl p-5 mb-5">
+        <div className="flex items-start gap-4">
+          {/* Large avatar */}
+          <span className="grid place-items-center h-16 w-16 rounded-2xl bg-white/15 text-white text-2xl font-display font-bold border-2 border-white/20 shadow-glow-saffron shrink-0">
+            {profile.displayName?.[0]?.toUpperCase()}
+          </span>
+          <div className="min-w-0 pt-1">
+            <h1 className="font-display text-display-sm text-white truncate">{profile.displayName}</h1>
+            <p className="text-sm text-navy-200 truncate flex items-center gap-1.5 mt-0.5">
+              <Mail width={12} height={12} /> {profile.email}
+            </p>
+            <div className="mt-2 flex items-center gap-2 flex-wrap">
+              {profile.status === "active"
+                ? <Badge tone="green" dot>Verified</Badge>
+                : profile.status === "rejected"
+                  ? <Badge tone="gray">Rejected</Badge>
+                  : <Badge tone="amber" dot>{profile.status}</Badge>}
+              {profile.isAdmin && <Badge tone="saffron"><Shield width={11} height={11} /> Admin</Badge>}
+            </div>
           </div>
         </div>
       </div>
 
       <Card>
         <div className="p-5">
-          <h2 className="text-sm font-semibold text-navy-900 mb-4">Edit profile</h2>
+          <h2 className="text-sm font-bold text-navy-900 mb-4 uppercase tracking-wide">Edit profile</h2>
           <form onSubmit={onSave} className="space-y-4">
             <Input label="Full name" value={form.displayName} onChange={set("displayName")} />
             <div className="grid grid-cols-2 gap-3">
@@ -93,27 +102,27 @@ export default function ProfilePage() {
                       placeholder="Policy analyst working on climate finance…" />
             <Input label="Contact link (LinkedIn / email)" value={form.contactLink} onChange={set("contactLink")}
                    placeholder="https://linkedin.com/in/…" />
-            {error && <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>}
+            {error && <p className="text-sm text-red-600 bg-red-50 rounded-xl px-3 py-2">{error}</p>}
             {msg && (
-              <p className={`text-sm rounded-lg px-3 py-2 ${msg.ok ? "text-green-700 bg-green-50" : "text-red-600 bg-red-50"}`}>
+              <p className={`text-sm rounded-xl px-3 py-2 font-medium ${msg.ok ? "text-green-700 bg-green-50" : "text-red-600 bg-red-50"}`}>
                 {msg.text}
               </p>
             )}
-            <Button type="submit" loading={saving} className="w-full">Save changes</Button>
+            <Button type="submit" loading={saving} className="w-full font-bold">Save changes</Button>
           </form>
         </div>
       </Card>
 
       <Card className="mt-4">
         <div className="p-5">
-          <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={onLogout}>
+          <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50 font-bold" onClick={onLogout}>
             <Logout width={16} height={16} /> Sign out
           </Button>
         </div>
       </Card>
 
-      <p className="text-center text-xs text-navy-300 mt-6">
-        Policy Bootcamp 2026 · Rashtram School of Public Leadership
+      <p className="text-center text-xs text-navy-300 mt-6 font-medium">
+        Policy BootCamp 2026 · Rashtram School of Public Leadership
       </p>
     </AppShell>
   );

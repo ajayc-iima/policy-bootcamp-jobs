@@ -12,12 +12,15 @@ import { Badge } from "@/components/ui/Badge";
 import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Check, Shield, Users, Search, Sparkle } from "@/components/icons";
+import { Check, Shield, Users, Search } from "@/components/icons";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/components/ui/Toaster";
+import { fetchStatusCounts } from "@/lib/users-api";
 import type { AppUser, UserStatus } from "@/lib/types";
 import { timeAgo } from "@/lib/utils";
+
+const PAGE_SIZE = 50;
 
 function parseUser(d: { data: () => Record<string, unknown> }): AppUser {
   const data = d.data();
@@ -37,10 +40,13 @@ export default function AdminPage() {
   const [loadingPending, setLoadingPending] = useState(true);
   const [loadingAll, setLoadingAll] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [backfilling, setBackfilling] = useState(false);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [batchApproving, setBatchApproving] = useState(false);
+  const [lastDoc, setLastDoc] = useState<import("firebase/firestore").QueryDocumentSnapshot | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [statusCounts, setStatusCounts] = useState<Record<UserStatus, number>>({ pending: 0, active: 0, suspended: 0, rejected: 0 });
+  const [loadingCounts, setLoadingCounts] = useState(true);
 
   useEffect(() => {
     if (profile && !isAdmin) router.replace("/jobs");
@@ -48,6 +54,12 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (!isAdmin) return;
+
+    // Accurate counts via aggregate queries
+    fetchStatusCounts()
+      .then(setStatusCounts)
+      .catch(() => {})
+      .finally(() => setLoadingCounts(false));
 
     const qPending = query(
       collection(db, "users"),
@@ -66,7 +78,6 @@ export default function AdminPage() {
       setLoadingPending(false);
     });
 
-    const PAGE_SIZE = 50;
     const qAll = query(collection(db, "users"), orderBy("createdAt", "desc"), limit(PAGE_SIZE));
     const unsubAll = onSnapshot(qAll, (snap) => {
       setAllUsers(snap.docs.map(parseUser));
@@ -81,10 +92,6 @@ export default function AdminPage() {
     return () => { unsubPending(); unsubAll(); };
   }, [isAdmin]);
 
-  const [lastDoc, setLastDoc] = useState<import("firebase/firestore").QueryDocumentSnapshot | null>(null);
-  const [hasMore, setHasMore] = useState(true);
-  const PAGE_SIZE = 50;
-
   const filteredUsers = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return allUsers;
@@ -96,13 +103,13 @@ export default function AdminPage() {
     );
   }, [allUsers, search]);
 
-  const active = useMemo(() =>
+  const filteredActive = useMemo(() =>
     filteredUsers.filter((u) => u.status === "active" && u.uid !== profile?.uid),
     [filteredUsers, profile]);
-  const suspended = useMemo(() =>
+  const filteredSuspended = useMemo(() =>
     filteredUsers.filter((u) => u.status === "suspended"),
     [filteredUsers]);
-  const rejected = useMemo(() =>
+  const filteredRejected = useMemo(() =>
     filteredUsers.filter((u) => u.status === "rejected"),
     [filteredUsers]);
 
@@ -168,77 +175,49 @@ export default function AdminPage() {
     }
   };
 
-  const backfillCounts = async () => {
-    setBackfilling(true);
-    let done = 0;
-    try {
-      const jobsSnap = await getDocs(collection(db, "jobs"));
-      for (const jobDoc of jobsSnap.docs) {
-        const appsSnap = await getDocs(
-          collection(db, "jobs", jobDoc.id, "applications"),
-        );
-        if (appsSnap.size > 0) {
-          await updateDoc(jobDoc.ref, { applicantCount: appsSnap.size });
-        }
-        done++;
-      }
-      toast(`Backfilled ${done} job${done !== 1 ? "s" : ""}`, "success");
-    } catch (err) {
-      console.error("backfill failed:", err);
-      toast(`Failed after ${done} jobs`, "error");
-    } finally {
-      setBackfilling(false);
-    }
-  };
-
   if (!isAdmin) return <AppShell><div className="py-16"><Spinner /></div></AppShell>;
 
   return (
     <AppShell>
-      <div className="flex items-center gap-2 mb-1">
-        <Shield width={18} height={18} className="text-saffron-600" />
-        <h1 className="text-xl font-semibold text-navy-900">Admin</h1>
+      {/* Bold admin header */}
+      <div className="gradient-hero rounded-2xl p-5 mb-5">
+        <div className="flex items-center gap-3">
+          <span className="grid place-items-center h-10 w-10 rounded-xl bg-white/15 text-white">
+            <Shield width={20} height={20} />
+          </span>
+          <div>
+            <h1 className="font-display text-display-sm text-white">Admin</h1>
+            <p className="text-sm text-navy-200 mt-0.5">Approve delegates & alumni, manage access</p>
+          </div>
+        </div>
       </div>
-      <p className="text-xs text-navy-400 mb-4">Approve delegates & alumni, manage access</p>
 
+      {/* Search */}
       <div className="relative mb-4">
         <Search width={18} height={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-navy-300" />
         <Input placeholder="Search name, email, batch, org…" value={search}
                onChange={(e) => setSearch(e.target.value)} className="pl-10" />
       </div>
 
+      {/* Bold stat tiles — use accurate aggregate counts */}
       <div className="grid grid-cols-4 gap-2 mb-5">
-        <Stat n={pendingUsers.length} label="Pending" tone="amber" />
-        <Stat n={active.length} label="Active" tone="green" />
-        <Stat n={suspended.length} label="Suspended" tone="red" />
-        <Stat n={rejected.length} label="Rejected" tone="gray" />
-      </div>
-
-      {/* Admin tools */}
-      <div className="mb-5 p-3 rounded-xl border border-navy-100">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-navy-800 flex items-center gap-1.5">
-              <Sparkle width={15} height={15} className="text-saffron-600" /> Tools
-            </p>
-            <p className="text-xs text-navy-400 mt-0.5">Backfill applicant counts for existing jobs.</p>
-          </div>
-          <Button size="sm" onClick={backfillCounts} loading={backfilling}>
-            <Sparkle width={14} height={14} /> Backfill
-          </Button>
-        </div>
+        <Stat n={loadingCounts ? "—" : statusCounts.pending} label="Pending" tone="amber" />
+        <Stat n={loadingCounts ? "—" : statusCounts.active} label="Active" tone="green" />
+        <Stat n={loadingCounts ? "—" : statusCounts.suspended} label="Suspended" tone="red" />
+        <Stat n={loadingCounts ? "—" : statusCounts.rejected} label="Rejected" tone="gray" />
       </div>
 
       <div className="space-y-5">
+        {/* Pending approval */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-sm font-semibold text-navy-800 flex items-center gap-1.5">
+            <h2 className="text-sm font-bold text-navy-800 flex items-center gap-1.5">
               <Users width={15} height={15} className="text-navy-400" /> Pending approval{" "}
-              <span className="text-navy-400">({pendingUsers.length})</span>
+              <span className="text-navy-400 font-normal">({pendingUsers.length})</span>
             </h2>
             {pendingUsers.length > 1 && (
               <div className="flex items-center gap-3">
-                <label className="flex items-center gap-1.5 text-xs text-navy-600 cursor-pointer select-none">
+                <label className="flex items-center gap-1.5 text-xs text-navy-600 font-medium cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={selected.size === pendingUsers.length && pendingUsers.length > 0}
@@ -248,7 +227,7 @@ export default function AdminPage() {
                   All
                 </label>
                 {selected.size > 0 && (
-                  <Button size="sm" onClick={approveSelected} loading={batchApproving}>
+                  <Button size="sm" onClick={approveSelected} loading={batchApproving} className="font-bold">
                     <Check width={14} height={14} /> Approve {selected.size}
                   </Button>
                 )}
@@ -262,8 +241,8 @@ export default function AdminPage() {
           ) : (
             <div className="space-y-2">
               {pendingUsers.map((u) => (
-                <Card key={u.uid}>
-                  <div className="p-4">
+                <Card key={u.uid} accent="amber">
+                  <div className="p-4 pl-5">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3 min-w-0">
                         {pendingUsers.length > 1 && (
@@ -275,18 +254,18 @@ export default function AdminPage() {
                           />
                         )}
                         <div className="min-w-0">
-                          <p className="font-medium text-navy-900 truncate">{u.displayName}</p>
-                          <p className="text-xs text-navy-500 truncate">{u.email}</p>
+                          <p className="font-bold text-navy-900 truncate">{u.displayName}</p>
+                          <p className="text-xs text-navy-500 truncate font-medium">{u.email}</p>
                           <p className="text-xs text-navy-400 mt-0.5">Batch {u.batch} · {u.organisation} · joined {timeAgo(u.createdAt)}</p>
                         </div>
                       </div>
-                      <Badge tone="amber">{u.status}</Badge>
+                      <Badge tone="amber" dot>{u.status}</Badge>
                     </div>
                     <div className="flex gap-2 mt-3">
-                      <Button size="sm" onClick={() => setStatus(u.uid, "active", "approved")}>
+                      <Button size="sm" onClick={() => setStatus(u.uid, "active", "approved")} className="font-bold">
                         <Check width={14} height={14} /> Approve
                       </Button>
-                      <Button size="sm" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50"
+                      <Button size="sm" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50 font-bold"
                               onClick={() => setStatus(u.uid, "rejected", "rejected")}>
                         Reject
                       </Button>
@@ -298,29 +277,29 @@ export default function AdminPage() {
           )}
         </div>
 
-        <Section title="Active members" users={active} empty="No active members yet.">
+        <Section title="Active members" users={filteredActive} empty="No active members yet.">
           {(u) => (
-            <Button size="sm" variant="ghost" className="text-red-600 hover:bg-red-50 mt-3"
+            <Button size="sm" variant="ghost" className="text-red-600 hover:bg-red-50 mt-3 font-semibold"
                     onClick={() => setStatus(u.uid, "suspended", "suspended")}>
               Suspend
             </Button>
           )}
         </Section>
 
-        {suspended.length > 0 && (
-          <Section title="Suspended" users={suspended} empty="">
+        {filteredSuspended.length > 0 && (
+          <Section title="Suspended" users={filteredSuspended} empty="">
             {(u) => (
-              <Button size="sm" variant="outline" className="mt-3" onClick={() => setStatus(u.uid, "active", "reinstated")}>
+              <Button size="sm" variant="outline" className="mt-3 font-bold" onClick={() => setStatus(u.uid, "active", "reinstated")}>
                 Reinstate
               </Button>
             )}
           </Section>
         )}
 
-        {rejected.length > 0 && (
-          <Section title="Rejected" users={rejected} empty="">
+        {filteredRejected.length > 0 && (
+          <Section title="Rejected" users={filteredRejected} empty="">
             {(u) => (
-              <Button size="sm" variant="outline" className="mt-3" onClick={() => setStatus(u.uid, "active", "reinstated")}>
+              <Button size="sm" variant="outline" className="mt-3 font-bold" onClick={() => setStatus(u.uid, "active", "reinstated")}>
                 Reinstate
               </Button>
             )}
@@ -328,7 +307,7 @@ export default function AdminPage() {
         )}
 
         {hasMore && (
-          <Button variant="outline" className="w-full mt-4" onClick={loadMore} loading={loadingMore}>
+          <Button variant="outline" className="w-full mt-4 font-bold" onClick={loadMore} loading={loadingMore}>
             Load more ({allUsers.length} loaded)
           </Button>
         )}
@@ -337,12 +316,17 @@ export default function AdminPage() {
   );
 }
 
-function Stat({ n, label, tone }: { n: number; label: string; tone: "amber" | "green" | "red" | "gray" }) {
-  const ring = { amber: "bg-amber-50 text-amber-700", green: "bg-green-50 text-green-700", red: "bg-red-50 text-red-700", gray: "bg-navy-100 text-navy-600" }[tone];
+function Stat({ n, label, tone }: { n: number | string; label: string; tone: "amber" | "green" | "red" | "gray" }) {
+  const tones = {
+    amber: "bg-amber-50 text-amber-700 border-amber-200",
+    green: "bg-green-50 text-green-700 border-green-200",
+    red: "bg-red-50 text-red-700 border-red-200",
+    gray: "bg-navy-50 text-navy-600 border-navy-200",
+  }[tone];
   return (
-    <div className={`rounded-xl ${ring} p-3 text-center`}>
-      <p className="text-2xl font-semibold leading-none">{n}</p>
-      <p className="text-[10px] mt-1 uppercase tracking-wide">{label}</p>
+    <div className={`rounded-xl ${tones} border p-3 text-center`}>
+      <p className="text-2xl font-bold leading-none">{n}</p>
+      <p className="text-[10px] mt-1 uppercase tracking-wide font-semibold">{label}</p>
     </div>
   );
 }
@@ -353,23 +337,23 @@ function Section({ title, users, empty, children }: {
 }) {
   return (
     <div>
-      <h2 className="text-sm font-semibold text-navy-800 mb-2 flex items-center gap-1.5">
-        <Users width={15} height={15} className="text-navy-400" /> {title} <span className="text-navy-400">({users.length})</span>
+      <h2 className="text-sm font-bold text-navy-800 mb-2 flex items-center gap-1.5">
+        <Users width={15} height={15} className="text-navy-400" /> {title} <span className="text-navy-400 font-normal">({users.length})</span>
       </h2>
       {users.length === 0 ? (
         <p className="text-sm text-navy-400 px-1">{empty}</p>
       ) : (
         <div className="space-y-2">
           {users.map((u) => (
-            <Card key={u.uid}>
-              <div className="p-4">
+            <Card key={u.uid} accent={u.status === "active" ? "green" : u.status === "suspended" ? "red" : "navy"}>
+              <div className="p-4 pl-5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="font-medium text-navy-900 truncate">{u.displayName}</p>
-                    <p className="text-xs text-navy-500 truncate">{u.email}</p>
+                    <p className="font-bold text-navy-900 truncate">{u.displayName}</p>
+                    <p className="text-xs text-navy-500 truncate font-medium">{u.email}</p>
                     <p className="text-xs text-navy-400 mt-0.5">Batch {u.batch} · {u.organisation} · joined {timeAgo(u.createdAt)}</p>
                   </div>
-                  <Badge tone={u.status === "active" ? "green" : u.status === "pending" ? "amber" : "red"}>{u.status}</Badge>
+                  <Badge tone={u.status === "active" ? "green" : u.status === "pending" ? "amber" : u.status === "suspended" ? "red" : "gray"} dot>{u.status}</Badge>
                 </div>
                 {children(u)}
               </div>

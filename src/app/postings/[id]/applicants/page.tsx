@@ -6,14 +6,22 @@ import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { ArrowLeft, ExternalLink, Inbox } from "@/components/icons";
+import { ArrowLeft, ExternalLink, Inbox, Mail } from "@/components/icons";
 import { fetchApplicationsForJob, updateApplicationStatus } from "@/lib/jobs-api";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/components/ui/Toaster";
 import type { Application, ApplicationStatus } from "@/lib/types";
 import { timeAgo, applicationStatusTone } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 const STATUSES: ApplicationStatus[] = ["submitted", "reviewing", "accepted", "rejected"];
+
+const statusAccent: Record<ApplicationStatus, "saffron" | "navy" | "green" | "red"> = {
+  submitted: "saffron",
+  reviewing: "navy",
+  accepted: "green",
+  rejected: "red",
+};
 
 export default function ApplicantsPage() {
   const params = useParams<{ id: string }>();
@@ -31,13 +39,11 @@ export default function ApplicantsPage() {
   const change = async (app: Application, status: ApplicationStatus) => {
     if (!profile) return;
     const prev = app.status;
-    // Optimistic update
     setApps((a) => a.map((x) => (x.id === app.id ? { ...x, status } : x)));
     try {
       await updateApplicationStatus(params.id, app.applicantId, profile.uid, status);
       toast(`Application ${status}`, "success");
     } catch {
-      // Rollback
       setApps((a) => a.map((x) => (x.id === app.id ? { ...x, status: prev } : x)));
       toast("Failed to update status", "error");
     }
@@ -45,11 +51,16 @@ export default function ApplicantsPage() {
 
   return (
     <AppShell>
-      <button onClick={() => router.back()} className="inline-flex items-center gap-1.5 text-sm text-navy-500 hover:text-navy-800 mb-3">
+      <button onClick={() => router.back()} className="inline-flex items-center gap-1.5 text-sm text-navy-500 hover:text-navy-800 mb-3 font-medium">
         <ArrowLeft width={16} height={16} /> Back
       </button>
-      <h1 className="text-xl font-semibold text-navy-900 mb-1">Applicants</h1>
-      <p className="text-xs text-navy-400 mb-4">{apps.length} {apps.length === 1 ? "application" : "applications"} so far</p>
+
+      <div className="gradient-hero rounded-2xl p-5 mb-5">
+        <h1 className="font-display text-display-sm text-white">Applicants</h1>
+        <p className="text-sm text-navy-200 mt-1">
+          <span className="font-bold text-saffron-400">{apps.length}</span> {apps.length === 1 ? "application" : "applications"} so far
+        </p>
+      </div>
 
       {loading ? (
         <div className="space-y-3">
@@ -71,37 +82,39 @@ export default function ApplicantsPage() {
       ) : (
         <div className="space-y-3">
           {apps.map((app) => (
-            <Card key={app.id}>
-              <div className="p-4">
+            <Card key={app.id} accent={statusAccent[app.status]}>
+              <div className="p-4 pl-5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <h3 className="font-semibold text-navy-900">{app.applicantName}</h3>
-                    <p className="text-xs text-navy-400">Batch {app.applicantBatch} · {timeAgo(app.createdAt)}</p>
+                    <h3 className="font-bold text-navy-900 text-[15px]">{app.applicantName}</h3>
+                    <p className="text-xs text-navy-400 font-medium">Batch {app.applicantBatch} · {timeAgo(app.createdAt)}</p>
                   </div>
-                  <Badge tone={applicationStatusTone[app.status]}>{app.status}</Badge>
+                  <Badge tone={applicationStatusTone[app.status]} dot>{app.status}</Badge>
                 </div>
 
                 <p className="mt-3 text-sm text-navy-700 whitespace-pre-wrap line-clamp-4">{app.coverNote}</p>
 
                 <div className="mt-3 flex flex-wrap gap-2">
                   <a href={app.resumeLink} target="_blank" rel="noopener noreferrer"
-                     className="inline-flex items-center gap-1.5 rounded-lg border border-navy-200 px-3 py-1.5 text-xs font-medium text-navy-700 hover:bg-navy-50 transition-colors">
+                     className="inline-flex items-center gap-1.5 rounded-lg border border-navy-200 px-3 py-1.5 text-xs font-bold text-navy-700 hover:bg-navy-50 transition-colors">
                     <ExternalLink width={13} height={13} /> Resume
                   </a>
                   <a href={`mailto:${app.applicantEmail}`}
-                     className="inline-flex items-center gap-1.5 rounded-lg border border-navy-200 px-3 py-1.5 text-xs font-medium text-navy-700 hover:bg-navy-50 transition-colors">
-                    Email
+                     className="inline-flex items-center gap-1.5 rounded-lg border border-navy-200 px-3 py-1.5 text-xs font-bold text-navy-700 hover:bg-navy-50 transition-colors">
+                    <Mail width={13} height={13} /> Email
                   </a>
                 </div>
 
-                {/* Status switcher */}
-                <div className="mt-3 flex gap-1.5 flex-wrap">
+                {/* Segmented status control — bold pill style */}
+                <div className="mt-4 flex gap-1.5 flex-wrap">
                   {STATUSES.map((s) => (
                     <button key={s} onClick={() => change(app, s)}
-                            className={`rounded-full px-3 py-1 text-xs font-medium border transition-all duration-150 ${
+                            className={cn(
+                              "rounded-full px-3.5 py-1.5 text-xs font-bold border transition-all duration-150",
                               app.status === s
                                 ? "bg-navy-900 text-white border-navy-900 shadow-elevation-1"
-                                : "bg-white text-navy-600 border-navy-200 hover:bg-navy-50 hover:border-navy-300"}`}>
+                                : "bg-white text-navy-600 border-navy-200 hover:bg-navy-50 hover:border-navy-300"
+                            )}>
                       {s}
                     </button>
                   ))}

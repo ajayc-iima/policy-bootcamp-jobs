@@ -28,12 +28,10 @@ import {
   type User as FirebaseUser,
 } from "firebase/auth";
 import {
-  doc, getDoc, getDocFromServer, setDoc, runTransaction, serverTimestamp, Timestamp,
+  doc, getDoc, getDocFromServer, runTransaction, serverTimestamp, Timestamp,
 } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import type { AppUser } from "@/lib/types";
-
-const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "ajaychoudhary0505@gmail.com";
 
 interface AuthContextValue {
   fbUser: FirebaseUser | null;
@@ -100,9 +98,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshProfile = useCallback(async () => {
     if (!fbUser) return;
-    const p = await loadProfile(fbUser.uid);
+    // Read from the server (not cache) so admin-driven status changes — e.g.
+    // being approved/suspended — are reflected immediately after save.
+    const p = await loadProfileFresh(fbUser.uid);
     setProfile(p);
-  }, [fbUser, loadProfile]);
+  }, [fbUser, loadProfileFresh]);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
@@ -132,74 +132,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   /**
    * Bootstrap transaction, used for every new signup.
-   *   - If no active admin exists yet → this user becomes admin + active.
+   *   - If no bootstrap marker exists yet → this is the first signup, so it
+   *     becomes admin + active (the project owner sets up the first account).
    *   - Otherwise → status "pending", awaiting approval.
-   * Re-runnable: if the bootstrap admin was ever deleted, the next signup
-   * takes over (useful during development cleanup).
+   *
+   * Security note: there is NO client-side admin-by-email shortcut. The old
+   * one was a privilege-escalation backdoor — the Firestore rules now allow an
+   * `active+isAdmin:true` user doc ONLY on the first signup, and this is the
+   * only code path that can write one. Everything else is forced to pending.
+   * Re-runnable: if the bootstrap admin is ever deleted (config/bootstrap too),
+   * the next signup takes over — useful during development cleanup.
    */
   const completeProfile = useCallback(async (info: ProfileInfo) => {
     if (!fbUser) throw new Error("Not signed in.");
     const userRef = doc(db, "users", fbUser.uid);
     const bootstrapRef = doc(db, "config", "bootstrap");
 
-    const isAdminEmail = fbUser.email === ADMIN_EMAIL;
-
-    if (isAdminEmail) {
-      const existingSnap = await getDoc(userRef);
-
-      const baseData = {
-        uid: fbUser.uid,
-        email: fbUser.email ?? "",
-        displayName: info.displayName,
-        batch: info.batch,
-        organisation: info.organisation,
-      };
-
-      if (existingSnap.exists()) {
-        await setDoc(userRef, {
-          ...baseData,
-          bio: existingSnap.data().bio ?? "",
-          contactLink: existingSnap.data().contactLink ?? "",
-          status: "active" as const,
-          isAdmin: true,
-          createdAt: existingSnap.data().createdAt ?? serverTimestamp(),
-        });
-      } else {
-        await setDoc(userRef, {
-          ...baseData,
-          bio: "",
-          contactLink: "",
-          status: "active" as const,
-          isAdmin: true,
-          createdAt: serverTimestamp(),
-        });
-      }
-
-      try {
-        await setDoc(bootstrapRef, { adminUid: fbUser.uid, initializedAt: serverTimestamp() });
-      } catch {
-        /* bootstrap may already exist — that's fine */
-      }
-
-      const p = await loadProfileFresh(fbUser.uid);
-      setProfile(p);
-      return;
-    }
+    const profileData = {
+      uid: fbUser.uid,
+      email: fbUser.email ?? "",
+      displayName: info.displayName,
+      batch: info.batch,
+      organisation: info.organisation,
+      bio: "",
+      contactLink: "",
+    };
 
     await runTransaction(db, async (tx) => {
       const bootstrapSnap = await tx.get(bootstrapRef);
-
       const needsBootstrap = !bootstrapSnap.exists();
-
-      const profileData = {
-        uid: fbUser.uid,
-        email: fbUser.email ?? "",
-        displayName: info.displayName,
-        batch: info.batch,
-        organisation: info.organisation,
-        bio: "",
-        contactLink: "",
-      };
 
       if (needsBootstrap) {
         tx.set(bootstrapRef, { adminUid: fbUser.uid, initializedAt: serverTimestamp() });
@@ -209,7 +170,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    const p = await loadProfile(fbUser.uid);
+    const p = await loadProfileFresh(fbUser.uid);
     setProfile(p);
   }, [fbUser, loadProfile]);
 
@@ -225,7 +186,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     isActive: profile?.status === "active",
     isAdmin: !!profile?.isAdmin,
-    needsProfile: !!fbUser && (!profile || (fbUser.email === ADMIN_EMAIL && profile.status !== "active")),
+    needsProfile: !!fbUser && !profile,
     signInWithGoogle,
     completeProfile,
     logOut,

@@ -91,7 +91,7 @@ function PendingScreen({ onLogout }: { onLogout: () => void }) {
         </div>
         <h1 className="text-xl font-semibold text-navy-900">Awaiting approval</h1>
         <p className="mt-2 text-sm text-navy-500 leading-relaxed">
-          Your account is registered. A Policy Bootcamp admin will verify your delegate/alumni status and approve you shortly.
+          Your account is registered. A Policy BootCamp admin will verify your delegate/alumni status and approve you shortly.
           You&apos;ll get access to post and apply for jobs once approved.
         </p>
         <div className="mt-6 rounded-xl bg-navy-50 border border-navy-100 p-4 text-left">
@@ -114,7 +114,7 @@ function SuspendedScreen({ onLogout }: { onLogout: () => void }) {
         </div>
         <h1 className="text-xl font-semibold text-navy-900">Account suspended</h1>
         <p className="mt-2 text-sm text-navy-500 leading-relaxed">
-          Your access has been paused. Please contact the Policy Bootcamp admin team to restore it.
+          Your access has been paused. Please contact the Policy BootCamp admin team to restore it.
         </p>
         <Button variant="outline" className="mt-6" onClick={onLogout}>Sign out</Button>
       </div>
@@ -131,7 +131,7 @@ function RejectedScreen({ onLogout }: { onLogout: () => void }) {
         </div>
         <h1 className="text-xl font-semibold text-navy-900">Application not approved</h1>
         <p className="mt-2 text-sm text-navy-500 leading-relaxed">
-          Your request to join the Policy Bootcamp network was not approved at this time. If you believe this is an error, please contact the admin team.
+          Your request to join the Policy BootCamp network was not approved at this time. If you believe this is an error, please contact the admin team.
         </p>
         <Button variant="outline" className="mt-6" onClick={onLogout}>Sign out</Button>
       </div>

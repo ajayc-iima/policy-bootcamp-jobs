@@ -74,15 +74,15 @@ function AuthPageInner() {
   }
 
   return (
-    <AuthShell title="Welcome" subtitle="Sign in to the Policy Bootcamp network.">
+    <AuthShell title="Welcome" subtitle="Sign in to the Policy BootCamp network.">
       <div className="space-y-5">
-        <div className="rounded-2xl border border-saffron-200 bg-saffron-50/50 p-4 shadow-elevation-1">
+        <div className="rounded-2xl border-2 border-saffron-200 bg-gradient-to-br from-saffron-50 to-white p-4 shadow-elevation-1">
           <div className="flex items-start gap-3">
-            <span className="grid place-items-center h-9 w-9 rounded-xl bg-white text-saffron-600 shrink-0 shadow-elevation-1">
+            <span className="grid place-items-center h-10 w-10 rounded-xl bg-gradient-to-br from-saffron-400 to-saffron-600 text-white shrink-0 shadow-glow-saffron">
               <Shield width={18} height={18} />
             </span>
             <div>
-              <p className="text-sm font-semibold text-navy-900">Members only</p>
+              <p className="text-sm font-bold text-navy-900">Members only</p>
               <p className="text-xs text-navy-500 mt-0.5 leading-relaxed">
                 Every account is admin-approved, so you always know who you&apos;re hiring — or being hired by.
               </p>
@@ -90,12 +90,12 @@ function AuthPageInner() {
           </div>
         </div>
 
-        <Button variant="outline" size="lg" className="w-full" onClick={onGoogle} loading={busy}>
+        <Button variant="outline" size="lg" className="w-full border-2 hover:border-navy-900 hover:shadow-elevation-2" onClick={onGoogle} loading={busy}>
           {!busy && <GoogleMark />}
           Continue with Google
         </Button>
 
-        {error && <p className="text-sm text-red-600 bg-red-50 rounded-xl px-4 py-3">{error}</p>}
+        {error && <p className="text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{error}</p>}
 
         {loading && (
           <div className="flex justify-center pt-2"><Spinner /></div>
@@ -104,7 +104,7 @@ function AuthPageInner() {
 
       <p className="mt-8 text-center text-xs text-navy-400">
         <span className="inline-flex items-center gap-1 justify-center">
-          <Sparkle width={12} height={12} /> Policy Bootcamp 2026 · Rashtram School of Public Leadership
+          <Sparkle width={12} height={12} /> Policy BootCamp 2026 · Rashtram School of Public Leadership
         </span>
       </p>
     </AuthShell>
@@ -157,8 +157,8 @@ function ProfileCompletion({
           <Input label="Organisation" value={organisation} onChange={(e) => setOrganisation(e.target.value)}
                  placeholder="Current org" error={orgErr} />
         </div>
-        {error && <p className="text-sm text-red-600 bg-red-50 rounded-xl px-4 py-3">{error}</p>}
-        <Button type="submit" loading={submitting} className="w-full" size="lg">
+        {error && <p className="text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{error}</p>}
+        <Button type="submit" loading={submitting} className="w-full shadow-glow-saffron" size="lg">
           Request access
         </Button>
         <p className="text-xs text-navy-400 text-center leading-relaxed">

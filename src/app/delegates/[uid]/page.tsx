@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Spinner } from "@/components/ui/Spinner";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { ArrowLeft, Briefcase, MapPin, Clock } from "@/components/icons";
+import { ArrowLeft, Briefcase, MapPin, Clock, Mail, Globe } from "@/components/icons";
 import { fetchUser } from "@/lib/users-api";
 import { fetchJobsByPoster } from "@/lib/jobs-api";
 import { timeAgo, workModeTone } from "@/lib/utils";
@@ -43,39 +43,39 @@ export default function DelegateDetailPage() {
     <AppShell>
       <div className="text-center py-20">
         <p className="text-navy-600">Delegate not found.</p>
-        <Link href="/delegates" className="text-saffron-700 font-medium mt-2 inline-block">← Back to delegates</Link>
+        <Link href="/delegates" className="text-saffron-700 font-bold mt-2 inline-block">← Back to delegates</Link>
       </div>
     </AppShell>
   );
 
   return (
     <AppShell>
-      <button onClick={() => router.back()} className="inline-flex items-center gap-1.5 text-sm text-navy-500 hover:text-navy-800 mb-3">
+      <button onClick={() => router.back()} className="inline-flex items-center gap-1.5 text-sm text-navy-500 hover:text-navy-800 mb-3 font-medium">
         <ArrowLeft width={16} height={16} /> Back
       </button>
 
-      {/* Profile card */}
-      <Card>
-        <div className="p-5 flex items-start gap-4">
-          <span className="grid place-items-center h-14 w-14 rounded-full bg-gradient-to-br from-navy-800 to-navy-900 text-white text-xl font-semibold shrink-0 shadow-elevation-1">
+      {/* Profile banner */}
+      <div className="gradient-hero rounded-2xl p-5 mb-5">
+        <div className="flex items-start gap-4">
+          <span className="grid place-items-center h-16 w-16 rounded-2xl bg-white/15 text-white text-2xl font-display font-bold border-2 border-white/20 shadow-glow-saffron shrink-0">
             {user.displayName[0]?.toUpperCase() ?? "?"}
           </span>
-          <div className="min-w-0 flex-1">
-            <h1 className="text-xl font-semibold text-navy-900">{user.displayName}</h1>
-            <p className="text-sm text-navy-500">{user.organisation} · Batch {user.batch}</p>
-            {user.bio && <p className="mt-2 text-sm text-navy-600">{user.bio}</p>}
+          <div className="min-w-0 pt-1">
+            <h1 className="font-display text-display-sm text-white">{user.displayName}</h1>
+            <p className="text-sm text-navy-200">{user.organisation} · Batch {user.batch}</p>
+            {user.bio && <p className="mt-2 text-sm text-navy-100 line-clamp-3">{user.bio}</p>}
             {user.contactLink && (
               <a href={user.contactLink} target="_blank" rel="noopener noreferrer"
-                 className="inline-block mt-2 text-sm font-medium text-saffron-700 hover:underline">
-                Contact → {user.contactLink.replace(/^https?:\/\//, "").split("/")[0]}
+                 className="inline-flex items-center gap-1.5 mt-2 text-sm font-bold text-saffron-400 hover:text-saffron-300 transition-colors">
+                <Globe width={13} height={13} /> {user.contactLink.replace(/^https?:\/\//, "").split("/")[0]}
               </a>
             )}
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Posted jobs */}
-      <h2 className="text-sm font-semibold text-navy-800 mt-5 mb-2">
+      <h2 className="text-sm font-bold text-navy-800 mt-2 mb-3 uppercase tracking-wide">
         Posted jobs <span className="text-navy-400 font-normal">({jobs.length})</span>
       </h2>
 
@@ -86,19 +86,19 @@ export default function DelegateDetailPage() {
           description="This delegate hasn't posted any jobs."
         />
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {jobs.map((j) => (
             <Link key={j.id} href={`/jobs/${j.id}`} className="block animate-fade-in">
-              <Card className="hover:border-saffron-300 hover:shadow-elevation-2 transition-all duration-200">
-                <div className="p-4">
+              <Card accent="saffron" interactive>
+                <div className="p-4 pl-5">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <h3 className="font-semibold text-navy-900 truncate">{j.title}</h3>
+                      <h3 className="font-bold text-navy-900 truncate text-[15px]">{j.title}</h3>
                       <p className="text-sm text-navy-500 truncate">{j.organisation}</p>
                     </div>
-                    <Badge tone={j.status === "open" ? "green" : "gray"}>{j.status}</Badge>
+                    <Badge tone={j.status === "open" ? "green" : "gray"} dot>{j.status}</Badge>
                   </div>
-                  <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-navy-500">
+                  <div className="mt-2.5 flex flex-wrap items-center gap-2 text-xs font-medium text-navy-500">
                     <span className="inline-flex items-center gap-1"><Briefcase width={13} height={13} /> {j.type}</span>
                     <span className="inline-flex items-center gap-1"><MapPin width={13} height={13} /> {j.location}</span>
                     <span className="inline-flex items-center gap-1"><Clock width={13} height={13} /> {timeAgo(j.createdAt)}</span>

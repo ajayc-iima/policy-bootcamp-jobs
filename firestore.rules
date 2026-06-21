@@ -7,6 +7,8 @@ rules_version = '2';
 //  interact. Pending/suspended users can read only their own user doc.
 //  Defence in depth — the client mirrors these checks for UX, but THIS is
 //  the source of truth. The browser is always treated as hostile.
+//
+//  ⚠️ After editing, deploy:  firebase deploy --only firestore:rules
 // ─────────────────────────────────────────────────────────────────────────
 
 service cloud.firestore {
@@ -19,6 +21,8 @@ service cloud.firestore {
     function isActive()        { return isSignedIn() && userDoc().status == 'active'; }
     function isAdmin()         { return isActive() && userDoc().isAdmin == true; }
     function isOwner(d)        { return isSignedIn() && d.uid == uid(); }
+    // True only for the very first signup — no bootstrap marker exists yet.
+    function isFirstSignup()   { return !exists(/databases/$(database)/documents/config/bootstrap); }
 
     // ── config/bootstrap ────────────────────────────────────────────────
     // One-time marker used to bootstrap the very first admin account.
@@ -26,15 +30,16 @@ service cloud.firestore {
       allow read: if isSignedIn();
       allow create: if isSignedIn()
                     && docId == 'bootstrap'
-                    && !exists(/databases/$(database)/documents/config/bootstrap)
+                    && isFirstSignup()
                     && request.resource.data.adminUid == uid();
-      allow update: if isSignedIn();
+      allow update: if isAdmin();
       allow delete: if false;
     }
 
     // ── users/{uid} ──────────────────────────────────────────────────────
-    //  Anyone signed in creates their own doc on signup (status forced pending).
-    //  Only the owner edits; only admins change status / isAdmin.
+    //  Anyone signed in creates their own doc on signup (status forced pending
+    //  EXCEPT the very first signup, which bootstraps the admin+active account).
+    //  Only the owner edits profile fields; only admins change status / isAdmin.
     match /users/{userId} {
       // Anyone active can browse the delegate directory.
       allow read:   if isSignedIn() && (request.auth.uid == userId || isActive() || isAdmin());
@@ -46,28 +51,29 @@ service cloud.firestore {
                     && request.resource.data.organisation is string
                     && request.resource.data.createdAt is timestamp
                     && (
+                      // Normal signup: always pending + non-admin.
                       (
-                        request.resource.data.status == 'pending'
+                        !isFirstSignup()
+                        && request.resource.data.status == 'pending'
                         && request.resource.data.isAdmin == false
                       )
-                      || (
-                        request.resource.data.status == 'active'
+                      ||
+                      // First-ever signup only: bootstraps the admin+active account.
+                      (
+                        isFirstSignup()
+                        && request.resource.data.status == 'active'
                         && request.resource.data.isAdmin == true
                       )
                     );
+      // Owner may edit their OWN profile fields only (never status/isAdmin/createdAt).
+      // Admins may edit any user (status changes, role changes).
       allow update: if isSignedIn() &&
-                    ( // owner may edit profile fields only
+                    (
                       (request.auth.uid == userId
                         && !request.resource.data.diff(resource.data).affectedKeys()
-                             .hasAny(['status', 'isAdmin', 'createdAt']))
-                      || (
-                        request.auth.uid == userId
-                        && resource.data.status == 'pending'
-                        && request.resource.data.status == 'active'
-                        && request.resource.data.isAdmin == true
-                        && request.resource.data.email == resource.data.email
-                      )
-                      || isAdmin() );
+                             .hasAny(['status', 'isAdmin', 'createdAt', 'email', 'uid']))
+                      || isAdmin()
+                    );
       allow delete: if isAdmin();
     }
 

@@ -53,18 +53,25 @@ export default function JobDetailPage() {
         <ArrowLeft width={16} height={16} /> Back
       </button>
 
-      {/* Hero card with gradient accent */}
-      <div className="rounded-2xl overflow-hidden">
-        <div className="gradient-hero p-5 pb-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Badge tone={workModeTone[job.mode]} dot>{job.mode}</Badge>
-            <Badge tone="saffron">{job.type}</Badge>
-            {job.status === "closed" && <Badge tone="gray">Closed</Badge>}
+      {/* Hero card with brand accent */}
+      <div className="rounded-2xl overflow-hidden border border-navy-100 shadow-elevation-1">
+        <div className="bg-navy-900 p-6 pb-5 text-white relative overflow-hidden">
+          {/* Subtle decorative circles */}
+          <div className="pointer-events-none absolute -top-12 -right-12 h-36 w-36 rounded-full border border-white/5 flex items-center justify-center">
+            <div className="h-24 w-24 rounded-full border border-white/5" />
           </div>
-          <h1 className="font-display text-display-sm text-white leading-tight">{job.title}</h1>
-          <p className="text-navy-200 mt-1 flex items-center gap-1.5 font-medium">
-            <Building width={14} height={14} /> {job.organisation}
-          </p>
+
+          <div className="relative z-10">
+            <div className="flex items-center gap-2 mb-3">
+              <Badge tone={workModeTone[job.mode]} dot>{job.mode}</Badge>
+              <Badge tone="saffron">{job.type}</Badge>
+              {job.status === "closed" && <Badge tone="gray">Closed</Badge>}
+            </div>
+            <h1 className="font-display text-3xl font-medium tracking-tight text-white leading-tight">{job.title}</h1>
+            <p className="text-navy-300 mt-1.5 flex items-center gap-1.5 font-semibold text-sm">
+              <Building width={14} height={14} className="text-crimson shrink-0" /> {job.organisation}
+            </p>
+          </div>
         </div>
 
         {/* Icon-tile meta grid */}

@@ -7,28 +7,35 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Saffron → amber: the warm accent. Punchier top end.
+        // Crimson mappings (replacing saffron)
         saffron: {
-          50: "#fff8ed", 100: "#ffefd3", 200: "#ffdba5", 300: "#ffc06d",
-          400: "#ff9a33", 500: "#ff7a0d", 600: "#f05e06", 700: "#c74607",
-          800: "#9e380e", 900: "#7f300f",
+          50: "#fdf2f4", 100: "#fce2e7", 200: "#f8b9c6", 300: "#f18099",
+          400: "#e43f62", 500: "#c5002f", 600: "#aa0029", 700: "#8e0022",
+          800: "#73001c", 900: "#5a0016",
         },
-        // Navy: near-ink primary. Deeper 900/950 for bold color blocks.
+        // Ink/Paper mappings (replacing navy)
         navy: {
-          50: "#f2f5f9", 100: "#e2e8f0", 200: "#c5d2e0", 300: "#97aed1",
-          400: "#6286b6", 500: "#426798", 600: "#34517e", 700: "#2c4267",
-          800: "#1a2b47", 900: "#0b1220", 950: "#060a14",
+          50: "#f2efe9", 100: "#e5e0d5", 200: "#d6cebe", 300: "#afa38e",
+          400: "#8b7e67", 500: "#675a44", 600: "#4b4131", 700: "#352e22",
+          800: "#201d19", 900: "#151413", 950: "#0e0d0c",
         },
-        // Teal: fresh secondary accent for variety in tiles/badges.
+        // Sage mappings (replacing teal)
         teal: {
-          50: "#effcfb", 100: "#cbf6f4", 200: "#99ece9", 300: "#5cdbd8",
-          400: "#22c3c0", 500: "#0ea5a4", 600: "#078480", 700: "#0a6666",
-          800: "#0d5151", 900: "#104343",
+          50: "#f6f8f5", 100: "#ecefe9", 200: "#d4dbd0", 300: "#b3c0ac",
+          400: "#8fa187", 500: "#687c59", 600: "#596a4c", 700: "#4a583f",
+          800: "#3b4632", 900: "#2c3426",
         },
+        // Absolute custom brand variables
+        ink: "#151413",
+        paper: "#F2EFE9",
+        crimson: "#C5002F",
+        marigold: "#C88028",
+        sage: "#687C59",
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
-        display: ["var(--font-display)", "Georgia", "serif"],
+        sans: ["var(--font-hanken)", "system-ui", "sans-serif"],
+        display: ["var(--font-newsreader)", "Georgia", "serif"],
+        serif: ["var(--font-newsreader)", "Georgia", "serif"],
       },
       fontSize: {
         // Tighter display tracking helpers for the bold revamp.
@@ -37,16 +44,16 @@ const config: Config = {
         "display-sm": ["1.875rem", { lineHeight: "1.1", letterSpacing: "-0.025em", fontWeight: "700" }],
       },
       boxShadow: {
-        "elevation-1": "0 1px 2px rgba(11,18,32,.05), 0 1px 3px rgba(11,18,32,.07)",
-        "elevation-2": "0 4px 10px rgba(11,18,32,.07), 0 8px 20px rgba(11,18,32,.09)",
-        "elevation-3": "0 8px 18px rgba(11,18,32,.1), 0 16px 40px rgba(11,18,32,.16)",
-        // Colored glows for bold CTAs / active elements.
-        "glow-saffron": "0 8px 24px rgba(255,122,13,.35)",
-        "glow-saffron-lg": "0 12px 36px rgba(255,122,13,.45)",
-        "glow-navy": "0 12px 36px rgba(11,18,32,.4)",
-        "soft": "0 1px 0 rgba(11,18,32,.04), 0 2px 8px rgba(11,18,32,.04)",
-        "ring-saffron": "0 0 0 4px rgba(255,122,13,.18)",
-        "ring-teal": "0 0 0 4px rgba(14,165,164,.18)",
+        "elevation-1": "0 1px 2px rgba(21,20,19,.05), 0 1px 3px rgba(21,20,19,.07)",
+        "elevation-2": "0 4px 10px rgba(21,20,19,.07), 0 8px 20px rgba(21,20,19,.09)",
+        "elevation-3": "0 8px 18px rgba(21,20,19,.1), 0 16px 40px rgba(21,20,19,.16)",
+        // Crimson & Ink glows for buttons and cards
+        "glow-saffron": "0 8px 24px rgba(197,0,47,.25)",
+        "glow-saffron-lg": "0 12px 36px rgba(197,0,47,.35)",
+        "glow-navy": "0 12px 36px rgba(21,20,19,.3)",
+        "soft": "0 1px 0 rgba(21,20,19,.04), 0 2px 8px rgba(21,20,19,.04)",
+        "ring-saffron": "0 0 0 4px rgba(197,0,47,.12)",
+        "ring-teal": "0 0 0 4px rgba(104,124,89,.12)",
       },
       borderRadius: {
         "2.5xl": "1.25rem",

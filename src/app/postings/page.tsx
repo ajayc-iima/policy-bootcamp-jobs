@@ -61,16 +61,25 @@ export default function MyPostingsPage() {
 
   return (
     <AppShell>
-      <div className="gradient-hero rounded-2xl p-5 mb-5 flex items-center justify-between">
-        <div>
-          <h1 className="font-display text-display-sm text-white">My postings</h1>
-          <p className="text-sm text-navy-200 mt-1">
-            <span className="font-bold text-saffron-400">{jobs.length}</span> {jobs.length === 1 ? "job" : "jobs"} you&apos;ve posted
+      {/* Editorial header band */}
+      <div className="bg-navy-900 rounded-2xl p-6 mb-5 text-white border border-white/5 relative overflow-hidden flex items-center justify-between">
+        {/* Subtle decorative circles */}
+        <div className="pointer-events-none absolute -top-12 -right-12 h-36 w-36 rounded-full border border-white/5 flex items-center justify-center">
+          <div className="h-24 w-24 rounded-full border border-white/5" />
+        </div>
+
+        <div className="relative z-10">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-crimson font-bold block mb-1">
+            Manthan Portal
+          </span>
+          <h1 className="font-display text-3xl font-medium tracking-tight">My postings</h1>
+          <p className="text-xs text-navy-300 mt-1">
+            <span className="font-bold text-crimson">{jobs.length}</span> {jobs.length === 1 ? "job" : "jobs"} you&apos;ve posted
           </p>
         </div>
-        <Link href="/post">
-          <Button size="sm" className="bg-white/15 text-white border-white/20 hover:bg-white/25 font-bold">
-            <Plus width={16} height={16} /> New
+        <Link href="/post" className="relative z-10">
+          <Button size="sm" className="bg-white/10 text-white border-white/10 hover:bg-white/20 font-bold text-xs uppercase tracking-wider">
+            <Plus width={14} height={14} /> New
           </Button>
         </Link>
       </div>

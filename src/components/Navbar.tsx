@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { cn } from "@/lib/utils";
-import { Briefcase, Home, Inbox, Plus, User, Users, Logout, Shield } from "@/components/icons";
+import { Briefcase, Home, Inbox, Plus, User, Users, Logout, Shield, ManthanLogo } from "@/components/icons";
 import { Button } from "@/components/ui/Button";
 
 type Tab = {
@@ -38,9 +38,12 @@ export function Navbar() {
       {/* Top bar — glassy dark for bold identity */}
       <header className="sticky top-0 z-30 bg-navy-900/90 backdrop-blur-xl border-b border-white/5">
         <div className="mx-auto max-w-3xl px-4 h-14 flex items-center justify-between">
-          <Link href="/jobs" className="flex items-center gap-2.5 group">
-            <span className="rounded-xl bg-white/90 backdrop-blur-sm border border-white/50 shadow-elevation-1">
-              <img src="/logo.webp" alt="Policy BootCamp" className="h-9 w-auto max-w-[200px] object-contain" />
+          <Link href="/jobs" className="flex items-center gap-2 group text-white">
+            <span className="text-crimson">
+              <ManthanLogo width={20} height={20} />
+            </span>
+            <span className="font-display font-bold text-base tracking-tight hover:opacity-90 transition-opacity">
+              Manthan
             </span>
           </Link>
 

@@ -85,3 +85,10 @@ export const X = (p: P) => (
 export const TrendUp = (p: P) => (
   <svg {...base(p)}><path d="M3 17l6-6 4 4 8-8" /><path d="M14 7h7v7" /></svg>
 );
+export const ManthanLogo = (p: P) => (
+  <svg {...base(p)} fill="none" strokeWidth="2">
+    <circle cx="12" cy="12" r="10" />
+    <circle cx="12" cy="12" r="6" stroke="#c5002f" />
+    <circle cx="12" cy="12" r="2.5" fill="#c5002f" stroke="#c5002f" />
+  </svg>
+);

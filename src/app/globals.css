@@ -52,19 +52,17 @@ body {
     @apply absolute left-0 top-5 bottom-5 w-1 rounded-r-full;
   }
 
-  /* A full-bleed gradient band for hero / CTA sections. */
+  /* A full-bleed editorial band for hero / CTA sections. */
   .gradient-hero {
-    background:
-      radial-gradient(120% 120% at 80% 0%, rgba(255,122,13,.28) 0%, rgba(255,122,13,0) 45%),
-      radial-gradient(100% 120% at 10% 100%, rgba(14,165,164,.22) 0%, rgba(14,165,164,0) 50%),
-      linear-gradient(135deg, #0b1220 0%, #1a2b47 60%, #2c4267 100%);
+    background: #151413;
+    border: 1px solid rgba(242, 239, 233, 0.08);
   }
   .gradient-saffron {
-    background: linear-gradient(135deg, #ff9a33 0%, #ff7a0d 50%, #f05e06 100%);
+    background: #c5002f;
   }
   .gradient-text {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(120deg, #ff9a33 0%, #ff7a0d 55%, #c74607 100%);
+    background-image: linear-gradient(120deg, #c5002f 0%, #c88028 100%);
   }
 }
 

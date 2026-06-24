@@ -179,15 +179,23 @@ export default function AdminPage() {
 
   return (
     <AppShell>
-      {/* Bold admin header */}
-      <div className="gradient-hero rounded-2xl p-5 mb-5">
-        <div className="flex items-center gap-3">
-          <span className="grid place-items-center h-10 w-10 rounded-xl bg-white/15 text-white">
-            <Shield width={20} height={20} />
+      {/* Editorial admin header */}
+      <div className="bg-navy-900 rounded-2xl p-6 mb-5 text-white border border-white/5 relative overflow-hidden">
+        {/* Subtle decorative circles */}
+        <div className="pointer-events-none absolute -top-12 -right-12 h-36 w-36 rounded-full border border-white/5 flex items-center justify-center">
+          <div className="h-24 w-24 rounded-full border border-white/5" />
+        </div>
+
+        <div className="flex items-center gap-3 relative z-10">
+          <span className="grid place-items-center h-10 w-10 rounded-xl bg-white/10 text-white shadow-soft">
+            <Shield width={20} height={20} className="text-crimson" />
           </span>
           <div>
-            <h1 className="font-display text-display-sm text-white">Admin</h1>
-            <p className="text-sm text-navy-200 mt-0.5">Approve delegates & alumni, manage access</p>
+            <span className="text-[10px] uppercase tracking-[0.2em] text-crimson font-bold block mb-1">
+              Manthan Portal
+            </span>
+            <h1 className="font-display text-3xl font-medium tracking-tight">Admin</h1>
+            <p className="text-xs text-navy-300 mt-1">Approve delegates & alumni, manage access</p>
           </div>
         </div>
       </div>

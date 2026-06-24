@@ -65,19 +65,27 @@ export default function ProfilePage() {
 
   return (
     <AppShell>
-      {/* Banner header */}
-      <div className="gradient-hero rounded-2xl p-5 mb-5">
-        <div className="flex items-start gap-4">
+      {/* Editorial banner header */}
+      <div className="bg-navy-900 rounded-2xl p-6 mb-5 text-white border border-white/5 relative overflow-hidden">
+        {/* Subtle decorative circles */}
+        <div className="pointer-events-none absolute -top-12 -right-12 h-36 w-36 rounded-full border border-white/5 flex items-center justify-center">
+          <div className="h-24 w-24 rounded-full border border-white/5" />
+        </div>
+
+        <div className="flex items-start gap-4 relative z-10">
           {/* Large avatar */}
-          <span className="grid place-items-center h-16 w-16 rounded-2xl bg-white/15 text-white text-2xl font-display font-bold border-2 border-white/20 shadow-glow-saffron shrink-0">
+          <span className="grid place-items-center h-16 w-16 rounded-2xl bg-white/10 text-white text-2xl font-display font-bold border border-white/10 shadow-soft shrink-0">
             {profile.displayName?.[0]?.toUpperCase()}
           </span>
           <div className="min-w-0 pt-1">
-            <h1 className="font-display text-display-sm text-white truncate">{profile.displayName}</h1>
-            <p className="text-sm text-navy-200 truncate flex items-center gap-1.5 mt-0.5">
-              <Mail width={12} height={12} /> {profile.email}
+            <span className="text-[10px] uppercase tracking-[0.2em] text-crimson font-bold block mb-1">
+              Member Profile
+            </span>
+            <h1 className="font-display text-3xl font-medium tracking-tight text-white truncate">{profile.displayName}</h1>
+            <p className="text-xs text-navy-300 truncate flex items-center gap-1.5 mt-1 font-medium">
+              <Mail width={12} height={12} className="text-crimson shrink-0" /> {profile.email}
             </p>
-            <div className="mt-2 flex items-center gap-2 flex-wrap">
+            <div className="mt-3 flex items-center gap-2 flex-wrap">
               {profile.status === "active"
                 ? <Badge tone="green" dot>Verified</Badge>
                 : profile.status === "rejected"

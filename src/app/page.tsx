@@ -6,19 +6,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/Button";
 import { Footer } from "@/components/Footer";
-import { Briefcase, Shield, Sparkle, Users, ArrowRight, ChevronRight, TrendUp } from "@/components/icons";
-
-const TRUST_STATS = [
-  { value: "200+", label: "Delegates & alumni" },
-  { value: "100%", label: "Admin-vetted" },
-  { value: "48h", label: "Avg. response" },
-];
-
-const STEPS = [
-  { num: "01", title: "Sign in with Google", desc: "One tap — no passwords to remember." },
-  { num: "02", title: "Get verified", desc: "Admin confirms your delegate or alumni status." },
-  { num: "03", title: "Post or apply", desc: "Share roles or find your next opportunity." },
-];
+import { ManthanLogo, ArrowRight } from "@/components/icons";
 
 export default function LandingPage() {
   const { fbUser, profile, loading } = useAuth();
@@ -37,153 +25,118 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-white overflow-hidden">
-      {/* ── Hero band (full-bleed gradient color block) ─────────────────── */}
-      <section className={`relative gradient-hero text-white transition-all duration-700 ${visible ? "opacity-100" : "opacity-0"}`}>
-        {/* Decorative animated blobs — no external assets */}
-        <div className="pointer-events-none absolute -top-24 -right-20 h-72 w-72 bg-saffron-500/30 blur-3xl animate-blob" />
-        <div className="pointer-events-none absolute top-40 -left-16 h-64 w-64 bg-teal-500/20 blur-3xl animate-blob" style={{ animationDelay: "3s" }} />
-
-        {/* Top bar */}
-        <header className="relative z-10 px-5 sm:px-8 pt-6 pb-2 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <span className="rounded-xl bg-white/90 backdrop-blur-sm border border-white/50 shadow-elevation-1">
-              <img src="/logo.webp" alt="Policy BootCamp" className="h-9 w-auto max-w-[200px] object-contain" />
+    <div className="min-h-screen flex flex-col bg-navy-50 text-navy-900 transition-opacity duration-700 select-none">
+      {/* Main Container */}
+      <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-8 sm:py-16 flex flex-col justify-center gap-6">
+        
+        {/* Top Header */}
+        <header className="flex items-center justify-between py-2 mb-2 sm:mb-6">
+          <div className="flex items-center gap-2">
+            <span className="h-6 w-6 text-crimson">
+              <ManthanLogo width={24} height={24} />
             </span>
+            <span className="font-display font-semibold text-lg tracking-tight text-navy-900">Manthan</span>
           </div>
-          <Link href="/auth" className="text-sm font-semibold text-white/80 hover:text-white transition-colors px-4 py-2 rounded-full hover:bg-white/10">Sign in</Link>
+          <Link href="/auth">
+            <span className="text-xs font-semibold uppercase tracking-wider text-crimson hover:opacity-80 transition-opacity">
+              Sign In
+            </span>
+          </Link>
         </header>
 
-        <div className="relative z-10 px-5 sm:px-8 pt-10 sm:pt-16 pb-16 sm:pb-20 max-w-2xl mx-auto w-full text-center">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-white/10 backdrop-blur border border-white/20 px-3.5 py-1.5 text-xs font-semibold text-saffron-200 mb-6 animate-float">
-            <Sparkle width={13} height={13} /> Policy BootCamp 2026 · Rashtram
-          </div>
-
-          <h1 className="font-display text-4xl sm:text-6xl font-bold leading-[1.02] tracking-tight">
-            The job board<br />
-            <span className="gradient-text">built on trust.</span>
-          </h1>
-          <p className="mt-5 text-white/70 text-base sm:text-lg leading-relaxed max-w-md mx-auto">
-            An exclusive hiring network for Policy BootCamp delegates &amp; alumni. Every member verified. Every role vetted.
-          </p>
-
-          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/auth" className="block">
-              <Button size="lg" className="w-full sm:w-auto shadow-glow-saffron hover:shadow-glow-saffron-lg hover:scale-[1.02]">
-                Get started <ArrowRight width={16} height={16} />
-              </Button>
-            </Link>
-          </div>
-
-          {/* Bold stat tiles */}
-          <div className="mt-12 grid grid-cols-3 gap-3">
-            {TRUST_STATS.map((s, i) => (
-              <div key={i} className="rounded-2xl bg-white/5 backdrop-blur border border-white/10 p-4 text-center">
-                <p className="text-2xl sm:text-4xl font-black text-white tracking-tight">{s.value}</p>
-                <p className="text-[11px] text-white/50 mt-1 uppercase tracking-wide font-semibold">{s.label}</p>
+        {/* Mockup Dual-Card Layout */}
+        <div className={`grid grid-cols-1 md:grid-cols-5 gap-6 transition-all duration-700 transform ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
+          
+          {/* Left Panel: The Dark Manthan Branding Card (col-span-3) */}
+          <div className="md:col-span-3 rounded-2xl bg-navy-900 text-white p-8 sm:p-12 relative overflow-hidden flex flex-col justify-between min-h-[380px] sm:min-h-[440px] shadow-elevation-2 border border-white/5">
+            {/* Subtle decorative concentric circles background */}
+            <div className="pointer-events-none absolute -top-10 -right-10 h-64 w-64 rounded-full border border-white/5 flex items-center justify-center">
+              <div className="h-48 w-48 rounded-full border border-white/5 flex items-center justify-center">
+                <div className="h-32 w-32 rounded-full border border-white/5" />
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Bottom curve into white */}
-        <svg className="block w-full" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden>
-          <path d="M0,40 C360,80 1080,0 1440,40 L1440,60 L0,60 Z" fill="#ffffff" />
-        </svg>
-      </section>
-
-      <main className="flex-1 flex flex-col">
-        {/* How it works */}
-        <section className="px-5 sm:px-8 py-12 sm:py-16">
-          <div className="max-w-2xl mx-auto w-full">
-            <div className="text-center mb-10">
-              <span className="text-xs font-bold uppercase tracking-widest text-saffron-600">How it works</span>
-              <h2 className="font-display text-3xl sm:text-4xl font-bold text-navy-900 mt-2 tracking-tight">Three steps to access</h2>
             </div>
-            <div className="space-y-3">
-              {STEPS.map((step, i) => (
-                <div key={i} className="group flex items-center gap-5 p-5 rounded-2xl bg-white border-2 border-navy-100 hover:border-saffron-300 hover:shadow-elevation-2 transition-all duration-200">
-                  <span className="shrink-0 grid place-items-center h-14 w-14 rounded-2xl gradient-saffron text-white text-lg font-black shadow-glow-saffron">
-                    {step.num}
-                  </span>
-                  <div className="min-w-0">
-                    <h3 className="font-bold text-navy-900 text-lg">{step.title}</h3>
-                    <p className="text-sm text-navy-500 mt-0.5">{step.desc}</p>
-                  </div>
+
+            <div>
+              <span className="text-[10px] sm:text-xs uppercase tracking-[0.25em] text-crimson font-bold block mb-8">
+                Rashtram School of Public Leadership
+              </span>
+              <div className="flex items-center gap-4 mb-6">
+                <span className="h-10 w-10 text-crimson animate-pulse">
+                  <ManthanLogo width={40} height={40} />
+                </span>
+                <h1 className="font-display text-4xl sm:text-5xl font-medium tracking-tight">
+                  Manthan
+                </h1>
+              </div>
+              <p className="font-display italic text-lg sm:text-xl text-navy-200/90 leading-relaxed max-w-lg mt-6">
+                “The churning of ideas – a digital chaupal where every Rashtram cohort can find each other, think together, and build together.”
+              </p>
+            </div>
+
+            {/* Red uppercase links at the bottom */}
+            <div className="mt-12 pt-6 border-t border-white/10 grid grid-cols-3 gap-2 text-left">
+              <div>
+                <p className="text-[10px] sm:text-xs font-bold text-crimson uppercase tracking-wider">People</p>
+                <p className="text-[10px] text-navy-300 mt-0.5">trust-gated directory</p>
+              </div>
+              <div>
+                <p className="text-[10px] sm:text-xs font-bold text-crimson uppercase tracking-wider">Chaupal</p>
+                <p className="text-[10px] text-navy-300 mt-0.5">think together</p>
+              </div>
+              <div>
+                <p className="text-[10px] sm:text-xs font-bold text-crimson uppercase tracking-wider">Maidan</p>
+                <p className="text-[10px] text-navy-300 mt-0.5">build together</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Panel: Side Action & Cohort Cards (col-span-2) */}
+          <div className="md:col-span-2 flex flex-col gap-6">
+            
+            {/* Launch Cohort Card */}
+            <div className="rounded-2xl bg-white border border-navy-100 p-6 flex flex-col justify-between shadow-elevation-1">
+              <div>
+                <span className="text-[10px] uppercase tracking-wider text-navy-400 font-bold block mb-4">
+                  Launch Cohort
+                </span>
+                <div className="flex items-center mb-4">
+                  <img src="/logo-pbc10.png" alt="PBC 10 Logo" className="h-16 w-auto object-contain" />
                 </div>
-              ))}
+              </div>
+              <p className="text-sm text-navy-500 font-medium leading-relaxed">
+                Phase 0 ships to the PBC 10 cohort live in residence at Sonipat.
+              </p>
             </div>
-          </div>
-        </section>
 
-        {/* Features — colored tiles */}
-        <section className="px-5 sm:px-8 pb-12 sm:pb-16">
-          <div className="max-w-2xl mx-auto w-full">
-            <div className="text-center mb-8">
-              <span className="text-xs font-bold uppercase tracking-widest text-teal-600">Why this exists</span>
-              <h2 className="font-display text-3xl sm:text-4xl font-bold text-navy-900 mt-2 tracking-tight">A network you can trust</h2>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <Feature
-                icon={<Briefcase width={22} height={22} />}
-                title="Post & apply"
-                desc="Dual-role: every member can both hire and seek."
-                tone="saffron"
-              />
-              <Feature
-                icon={<Shield width={22} height={22} />}
-                title="Verified network"
-                desc="Admin-gated access means no random recruiters."
-                tone="navy"
-              />
-              <Feature
-                icon={<Users width={22} height={22} />}
-                title="Same cohort"
-                desc="Built for people who already share a mission."
-                tone="teal"
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* CTA band */}
-        <section className="px-5 sm:px-8 pb-16">
-          <div className="max-w-2xl mx-auto w-full">
-            <div className="relative overflow-hidden rounded-3xl gradient-hero p-8 sm:p-12 shadow-elevation-3">
-              <div className="pointer-events-none absolute -bottom-16 -right-10 h-48 w-48 bg-saffron-500/30 blur-3xl" />
-              <div className="relative text-center">
-                <TrendUp width={28} height={28} className="mx-auto text-saffron-300 mb-3" />
-                <h2 className="font-display text-3xl sm:text-4xl font-bold text-white tracking-tight">Ready to join?</h2>
-                <p className="mt-3 text-white/70 text-sm max-w-sm mx-auto">Sign in with your Google account and get verified by the admin.</p>
-                <Link href="/auth" className="inline-block mt-6">
-                  <Button size="lg" className="shadow-glow-saffron hover:shadow-glow-saffron-lg hover:scale-[1.02]">
-                    Continue with Google <ChevronRight width={16} height={16} />
+            {/* Closed Circle Portal Access Card */}
+            <div className="rounded-2xl bg-white border border-navy-100 p-6 flex flex-col justify-between flex-1 shadow-elevation-1">
+              <div>
+                <span className="text-[10px] uppercase tracking-wider text-navy-400 font-bold block mb-3">
+                  Portal Access
+                </span>
+                <h3 className="font-display text-lg font-bold text-navy-900 leading-tight">
+                  Closed Network Jobs
+                </h3>
+                <p className="text-xs text-navy-500 mt-2 leading-relaxed">
+                  Welcome to our private circle. This space is exclusively for members to discover public policy, research, and governance opportunities.
+                </p>
+              </div>
+              
+              <div className="mt-8">
+                <Link href="/auth" className="block">
+                  <Button variant="primary" className="w-full bg-crimson hover:bg-crimson/95 text-white shadow-elevation-1 py-3 text-xs uppercase tracking-wider font-bold">
+                    Enter Portal <ArrowRight width={14} height={14} className="ml-1" />
                   </Button>
                 </Link>
               </div>
             </div>
+
           </div>
-        </section>
+
+        </div>
       </main>
 
       <Footer />
-    </div>
-  );
-}
-
-const featureTone: Record<string, { wrap: string; icon: string }> = {
-  saffron: { wrap: "from-saffron-50 to-saffron-100/40 border-saffron-200", icon: "bg-gradient-to-br from-saffron-400 to-saffron-600 text-white" },
-  navy: { wrap: "from-navy-50 to-navy-100/40 border-navy-200", icon: "bg-gradient-to-br from-navy-800 to-navy-900 text-white" },
-  teal: { wrap: "from-teal-50 to-teal-100/40 border-teal-200", icon: "bg-gradient-to-br from-teal-400 to-teal-600 text-white" },
-};
-
-function Feature({ icon, title, desc, tone }: { icon: React.ReactNode; title: string; desc: string; tone: "saffron" | "navy" | "teal" }) {
-  const t = featureTone[tone];
-  return (
-    <div className={`rounded-2xl bg-gradient-to-br ${t.wrap} border-2 p-5 hover:shadow-elevation-2 transition-shadow`}>
-      <div className={`grid place-items-center h-11 w-11 rounded-xl ${t.icon} shadow-elevation-1 mb-3`}>{icon}</div>
-      <h3 className="font-bold text-navy-900">{title}</h3>
-      <p className="text-sm text-navy-600 mt-1 leading-relaxed">{desc}</p>
     </div>
   );
 }

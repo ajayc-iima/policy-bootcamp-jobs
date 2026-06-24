@@ -1,11 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Fraunces } from "next/font/google";
+import { Hanken_Grotesk, Newsreader } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import { ToastProvider } from "@/components/ui/Toaster";
 
-const inter = Inter({ subsets: ["latin"], display: "swap", variable: "--font-inter" });
-const fraunces = Fraunces({ subsets: ["latin"], display: "swap", variable: "--font-display", weight: ["600", "700"] });
+const hanken = Hanken_Grotesk({ subsets: ["latin"], display: "swap", variable: "--font-hanken" });
+const newsreader = Newsreader({ subsets: ["latin"], display: "swap", variable: "--font-newsreader", weight: ["400", "500", "600", "700"], style: ["normal", "italic"] });
 
 export const metadata: Metadata = {
   title: "Policy BootCamp Job Portal",
@@ -24,7 +24,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
+    <html lang="en" className={`${hanken.variable} ${newsreader.variable}`}>
       <head>
         <meta name="mobile-web-app-capable" content="yes" />
       </head>

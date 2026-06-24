@@ -48,9 +48,20 @@ export default function DelegatesPage() {
 
   return (
     <AppShell>
-      <div className="gradient-hero rounded-2xl p-5 mb-5">
-        <h1 className="font-display text-display-sm text-white">Delegates</h1>
-        <p className="text-sm text-navy-200 mt-1">Connect with the Policy BootCamp network</p>
+      {/* Editorial header band */}
+      <div className="bg-navy-900 rounded-2xl p-6 mb-5 text-white border border-white/5 relative overflow-hidden">
+        {/* Subtle decorative circles */}
+        <div className="pointer-events-none absolute -top-12 -right-12 h-36 w-36 rounded-full border border-white/5 flex items-center justify-center">
+          <div className="h-24 w-24 rounded-full border border-white/5" />
+        </div>
+
+        <div className="relative z-10">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-crimson font-bold block mb-1">
+            Manthan Portal
+          </span>
+          <h1 className="font-display text-3xl font-medium tracking-tight">Delegates</h1>
+          <p className="text-xs text-navy-300 mt-1">Connect with the Policy BootCamp network</p>
+        </div>
       </div>
 
       <div className="relative mb-4">

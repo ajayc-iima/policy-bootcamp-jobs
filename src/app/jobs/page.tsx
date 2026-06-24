@@ -48,17 +48,25 @@ export default function JobsPage() {
 
   return (
     <AppShell>
-      {/* Bold header band */}
-      <div className="gradient-hero rounded-2xl p-5 mb-5">
-        <div className="flex items-center justify-between">
+      {/* Editorial header band */}
+      <div className="bg-navy-900 rounded-2xl p-6 mb-5 text-white border border-white/5 relative overflow-hidden">
+        {/* Subtle decorative circles */}
+        <div className="pointer-events-none absolute -top-12 -right-12 h-36 w-36 rounded-full border border-white/5 flex items-center justify-center">
+          <div className="h-24 w-24 rounded-full border border-white/5" />
+        </div>
+
+        <div className="flex items-center justify-between relative z-10">
           <div>
-            <h1 className="font-display text-display-sm text-white">Open roles</h1>
-            <p className="text-sm text-navy-200 mt-1">
-              <span className="font-bold text-saffron-400">{jobs.length}</span> live {jobs.length === 1 ? "job" : "jobs"} in the network
+            <span className="text-[10px] uppercase tracking-[0.2em] text-crimson font-bold block mb-1">
+              Manthan Portal
+            </span>
+            <h1 className="font-display text-3xl font-medium tracking-tight">Open roles</h1>
+            <p className="text-xs text-navy-300 mt-1">
+              <span className="font-bold text-crimson">{jobs.length}</span> verified {jobs.length === 1 ? "position" : "positions"} live in the network
             </p>
           </div>
           <Link href="/post" className="sm:hidden">
-            <span className="inline-flex items-center gap-1 rounded-full bg-saffron-500 text-white text-xs font-bold px-4 py-2.5 shadow-glow-saffron active:scale-95 transition-transform">
+            <span className="inline-flex items-center gap-1 rounded-full bg-crimson text-white text-xs font-bold px-4 py-2.5 shadow-glow-saffron active:scale-95 transition-transform">
               <Plus width={14} height={14} /> Post
             </span>
           </Link>

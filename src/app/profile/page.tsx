@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
-import { Logout, Shield, Mail, Globe } from "@/components/icons";
+import { Logout, Shield, Mail, Globe, Phone } from "@/components/icons";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth-context";
 import { firebaseError } from "@/lib/firebase-errors";
@@ -23,6 +23,7 @@ export default function ProfilePage() {
     organisation: profile?.organisation ?? "",
     bio: profile?.bio ?? "",
     contactLink: profile?.contactLink ?? "",
+    contactNumber: profile?.contactNumber ?? "",
   });
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
@@ -48,6 +49,7 @@ export default function ProfilePage() {
         organisation: form.organisation.trim(),
         bio: form.bio.trim(),
         contactLink: form.contactLink.trim(),
+        contactNumber: form.contactNumber.trim(),
       });
       await refreshProfile();
       setMsg({ ok: true, text: "Profile updated" });
@@ -110,6 +112,8 @@ export default function ProfilePage() {
                       placeholder="Policy analyst working on climate finance…" />
             <Input label="Contact link (LinkedIn / email)" value={form.contactLink} onChange={set("contactLink")}
                    placeholder="https://linkedin.com/in/…" />
+            <Input label="Contact number" value={form.contactNumber} onChange={set("contactNumber")}
+                   placeholder="+91 (1 (555) 123-4567" />
             {error && <p className="text-sm text-red-600 bg-red-50 rounded-xl px-3 py-2">{error}</p>}
             {msg && (
               <p className={`text-sm rounded-xl px-3 py-2 font-medium ${msg.ok ? "text-green-700 bg-green-50" : "text-red-600 bg-red-50"}`}>

@@ -6,7 +6,7 @@ import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Input } from "@/components/ui/Input";
-import { Users, Search } from "@/components/icons";
+import { Users, Search, Phone } from "@/components/icons";
 import { fetchActiveUsers } from "@/lib/users-api";
 import type { AppUser } from "@/lib/types";
 
@@ -108,9 +108,14 @@ export default function DelegatesPage() {
                       <p className="text-xs text-navy-500 truncate font-medium">{u.organisation} · Batch {u.batch}</p>
                     </div>
                   </div>
-                  {u.bio && (
-                    <p className="mt-2.5 text-sm text-navy-600 line-clamp-2 ml-[60px]">{u.bio}</p>
-                  )}
+{u.bio && (
+                      <p className="mt-2.5 text-sm text-navy-600 line-clamp-2 ml-[60px]">{u.bio}</p>
+                    )}
+                    {u.contactNumber && (
+                      <a href={`tel:${u.contactNumber}`} className="ml-[60px] inline-flex items-center gap-1.5 mt-2 text-xs text-saffron-600 hover:text-saffron-700 transition-colors">
+                        <Phone width={12} height={12} /> {u.contactNumber}
+                      </a>
+                    )}
                 </div>
               </Card>
             </Link>

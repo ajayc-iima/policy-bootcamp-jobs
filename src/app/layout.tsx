@@ -4,8 +4,20 @@ import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import { ToastProvider } from "@/components/ui/Toaster";
 
-const hanken = Hanken_Grotesk({ subsets: ["latin"], display: "swap", variable: "--font-hanken" });
-const newsreader = Newsreader({ subsets: ["latin"], display: "swap", variable: "--font-newsreader", weight: ["400", "500", "600", "700"], style: ["normal", "italic"] });
+const hanken = Hanken_Grotesk({ 
+  subsets: ["latin"], 
+  display: "swap", 
+  variable: "--font-hanken",
+  fallback: ["system-ui", "sans-serif"],
+});
+const newsreader = Newsreader({ 
+  subsets: ["latin"], 
+  display: "swap", 
+  variable: "--font-newsreader", 
+  weight: ["400", "500", "600", "700"], 
+  style: ["normal", "italic"],
+  fallback: ["system-ui", "serif"],
+});
 
 export const metadata: Metadata = {
   title: "Policy BootCamp Job Portal",

@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Spinner } from "@/components/ui/Spinner";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { ArrowLeft, Briefcase, MapPin, Clock, Mail, Globe } from "@/components/icons";
+import { ArrowLeft, Briefcase, MapPin, Clock, Mail, Globe, Phone } from "@/components/icons";
 import { fetchUser } from "@/lib/users-api";
 import { fetchJobsByPoster } from "@/lib/jobs-api";
 import { timeAgo, workModeTone } from "@/lib/utils";
@@ -64,12 +64,20 @@ export default function DelegateDetailPage() {
             <h1 className="font-display text-display-sm text-white">{user.displayName}</h1>
             <p className="text-sm text-navy-200">{user.organisation} · Batch {user.batch}</p>
             {user.bio && <p className="mt-2 text-sm text-navy-100 line-clamp-3">{user.bio}</p>}
-            {user.contactLink && (
-              <a href={user.contactLink} target="_blank" rel="noopener noreferrer"
-                 className="inline-flex items-center gap-1.5 mt-2 text-sm font-bold text-saffron-400 hover:text-saffron-300 transition-colors">
-                <Globe width={13} height={13} /> {user.contactLink.replace(/^https?:\/\//, "").split("/")[0]}
-              </a>
-            )}
+            <div className="mt-3 flex flex-wrap gap-3">
+              {user.contactLink && (
+                <a href={user.contactLink} target="_blank" rel="noopener noreferrer"
+                   className="inline-flex items-center gap-1.5 text-sm font-bold text-saffron-400 hover:text-saffron-300 transition-colors">
+                  <Globe width={13} height={13} /> {user.contactLink.replace(/^https?:\/\//, "").split("/")[0]}
+                </a>
+              )}
+              {user.contactNumber && (
+                <a href={`tel:${user.contactNumber}`} 
+                   className="inline-flex items-center gap-1.5 text-sm font-bold text-saffron-400 hover:text-saffron-300 transition-colors">
+                  <Phone width={13} height={13} /> {user.contactNumber}
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </div>

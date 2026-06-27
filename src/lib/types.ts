@@ -14,6 +14,8 @@ export interface AppUser {
   bio?: string;
   /** Public contact link (LinkedIn, email, etc.). */
   contactLink?: string;
+  /** Contact phone number. */
+  contactNumber?: string;
   status: UserStatus;
   isAdmin: boolean;
   createdAt: number;
@@ -21,7 +23,7 @@ export interface AppUser {
 
 export type JobType = "Full-time" | "Part-time" | "Contract" | "Internship" | "Fellowship" | "Consulting";
 export type WorkMode = "On-site" | "Hybrid" | "Remote";
-export type JobStatus = "open" | "closed";
+export type JobStatus = "open" | "closed" | "archived";
 
 export interface Job {
   id: string;
@@ -40,15 +42,36 @@ export interface Job {
   status: JobStatus;
   createdAt: number;
   applicantCount?: number;
+  /** Expiry timestamp set by poster (milliseconds since epoch). */
+  expiresAt: number;
+  /** When job was archived (auto-expired or manual). */
+  archivedAt?: number;
 }
 
-export type ApplicationStatus = "submitted" | "reviewing" | "accepted" | "rejected";
+export interface NewJobInput {
+  title: string;
+  organisation: string;
+  type: JobType;
+  mode: WorkMode;
+  location: string;
+  salary?: string;
+  description: string;
+  externalLink?: string;
+  postedBy: string;
+  postedByName: string;
+  postedByEmail: string;
+  expiresAt: number;
+}
+
+export type ApplicationStatus = "submitted" | "reviewing" | "accepted" | "rejected" | "withdrawn";
 
 export interface Application {
   id: string;
   jobId: string;
   jobTitle: string;
   organisation: string;
+  /** uid of the job poster (so withdrawals can update both copies without a lookup). */
+  postedBy: string;
   applicantId: string;
   applicantName: string;
   applicantEmail: string;
@@ -57,4 +80,12 @@ export interface Application {
   resumeLink: string;
   status: ApplicationStatus;
   createdAt: number;
+}
+
+export interface SavedJob {
+  id: string;
+  jobId: string;
+  jobTitle: string;
+  organisation: string;
+  savedAt: number;
 }

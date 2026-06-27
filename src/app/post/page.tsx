@@ -10,7 +10,7 @@ import { firebaseError } from "@/lib/firebase-errors";
 import { createJob } from "@/lib/jobs-api";
 import { isValidUrl } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
-import { Briefcase } from "@/components/icons";
+import { Briefcase, Calendar } from "@/components/icons";
 import type { JobType, WorkMode } from "@/lib/types";
 
 const JOB_TYPES: JobType[] = ["Full-time", "Part-time", "Contract", "Internship", "Fellowship", "Consulting"];
@@ -19,9 +19,15 @@ const MODES: WorkMode[] = ["On-site", "Hybrid", "Remote"];
 export default function PostJobPage() {
   const router = useRouter();
   const { profile } = useAuth();
+
+  // Expiry window: min = tomorrow, max = 1 year out, default = 60 days.
+  const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+  const defaultExpiry = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+  const maxExpiry = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+
   const [form, setForm] = useState({
     title: "", organisation: "", type: "Full-time" as JobType, mode: "On-site" as WorkMode,
-    location: "", salary: "", description: "", externalLink: "",
+    location: "", salary: "", description: "", externalLink: "", expiresAt: defaultExpiry,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -37,6 +43,9 @@ export default function PostJobPage() {
     if (form.location.trim().length < 2) errs.location = "Required";
     if (form.description.trim().length < 30) errs.description = "Describe the role in at least 30 characters";
     if (form.externalLink && !isValidUrl(form.externalLink)) errs.externalLink = "Must be a valid URL (https://…)";
+    const expiryTs = form.expiresAt ? new Date(form.expiresAt).getTime() : NaN;
+    if (!form.expiresAt || Number.isNaN(expiryTs)) errs.expiresAt = "Expiry date is required";
+    else if (expiryTs <= Date.now()) errs.expiresAt = "Expiry must be a future date";
     setErrors(errs);
     if (Object.keys(errs).length) return;
 
@@ -54,6 +63,7 @@ export default function PostJobPage() {
         postedBy: profile!.uid,
         postedByName: profile!.displayName,
         postedByEmail: profile!.email,
+        expiresAt: new Date(form.expiresAt).getTime(),
       });
       router.replace(`/jobs/${id}`);
     } catch (err) {
@@ -115,6 +125,22 @@ export default function PostJobPage() {
 
             <Input id="link" label="External apply link (optional)" value={form.externalLink} onChange={set("externalLink")}
                    error={errors.externalLink} placeholder="https://…" hint="If applicants should apply on your site instead." />
+
+            <div className="space-y-1.5">
+              <label htmlFor="expiresAt" className="block text-sm font-semibold text-navy-800">
+                Job expiry date
+              </label>
+              <input
+                id="expiresAt"
+                type="date"
+                value={form.expiresAt}
+                onChange={set("expiresAt")}
+                min={tomorrow}
+                max={maxExpiry}
+                className={`w-full rounded-xl border-2 bg-white px-4 text-navy-900 placeholder:text-navy-300 focus-ring focus:border-saffron-500 transition-colors h-12 ${errors.expiresAt ? "border-red-400 focus:border-red-500" : "border-navy-200"}`}
+              />
+              {errors.expiresAt && <p className="text-xs font-medium text-red-600">{errors.expiresAt}</p>}
+            </div>
 
             {errors.form && <p className="text-sm text-red-600 bg-red-50 rounded-xl px-3 py-2">{errors.form}</p>}
 

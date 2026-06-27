@@ -1,7 +1,7 @@
 import { type HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
-type Accent = "saffron" | "navy" | "teal" | "green" | "red" | "amber" | "none";
+type Accent = "saffron" | "navy" | "teal" | "green" | "red" | "amber" | "gray" | "none";
 
 const accentBar: Record<Exclude<Accent, "none">, string> = {
   saffron: "bg-saffron-500",
@@ -10,6 +10,7 @@ const accentBar: Record<Exclude<Accent, "none">, string> = {
   green: "bg-green-500",
   red: "bg-red-500",
   amber: "bg-amber-500",
+  gray: "bg-navy-400",
 };
 
 export function Card({

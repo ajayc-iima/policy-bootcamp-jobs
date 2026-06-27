@@ -7,8 +7,9 @@ import { JobCardSkeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Input } from "@/components/ui/Input";
 import { useToast } from "@/components/ui/Toaster";
-import { Briefcase, Plus, Search } from "@/components/icons";
-import { fetchOpenJobs } from "@/lib/jobs-api";
+import { useAuth } from "@/lib/auth-context";
+import { Briefcase, Plus, Search, BookmarkFilled } from "@/components/icons";
+import { fetchOpenJobs, fetchSavedJobs } from "@/lib/jobs-api";
 import type { Job, JobType } from "@/lib/types";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -17,10 +18,13 @@ const TYPES: (JobType | "All")[] = ["All", "Full-time", "Fellowship", "Internshi
 
 export default function JobsPage() {
   const { toast } = useToast();
+  const { profile } = useAuth();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<(typeof TYPES)[number]>("All");
+  const [filter, setFilter] = useState<"All" | "Saved" | JobType>("All");
+  const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
+  const [loadingSaved, setLoadingSaved] = useState(false);
 
   useEffect(() => {
     fetchOpenJobs()
@@ -32,10 +36,30 @@ export default function JobsPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  // Load saved jobs when profile changes
+  useEffect(() => {
+    if (!profile) {
+      setSavedJobIds(new Set());
+      return;
+    }
+    setLoadingSaved(true);
+    fetchSavedJobs(profile.uid)
+      .then((saved) => {
+        console.log("Saved jobs fetched:", saved);
+        setSavedJobIds(new Set(saved.map((s) => s.jobId)));
+      })
+      .catch((err) => {
+        console.error("Failed to fetch saved jobs:", err);
+        setSavedJobIds(new Set());
+      })
+      .finally(() => setLoadingSaved(false));
+  }, [profile]);
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return jobs.filter((j) => {
-      if (filter !== "All" && j.type !== filter) return false;
+    const result = jobs.filter((j) => {
+      if (filter === "Saved" && !savedJobIds.has(j.id)) return false;
+      if (filter !== "All" && filter !== "Saved" && j.type !== filter) return false;
       if (!q) return true;
       return (
         j.title.toLowerCase().includes(q) ||
@@ -44,7 +68,11 @@ export default function JobsPage() {
         j.description.toLowerCase().includes(q)
       );
     });
-  }, [jobs, search, filter]);
+    console.log("Filter:", filter, "Saved IDs:", savedJobIds, "Filtered count:", result.length);
+    return result;
+  }, [jobs, search, filter, savedJobIds]);
+
+  const allFilters = useMemo(() => ["All", "Saved", ...TYPES.slice(1)] as const, []);
 
   return (
     <AppShell>
@@ -82,9 +110,10 @@ export default function JobsPage() {
 
       {/* Pill filter chips — active = saffron fill */}
       <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 mb-5 -mx-4 px-4">
-        {TYPES.map((t) => (
+        {allFilters.map((t) => (
           <button key={t} onClick={() => setFilter(t)}
                   className={cn("chip", filter === t && "chip-active-saffron")}>
+            {t === "Saved" && !loadingSaved && <BookmarkFilled width={14} height={14} className="mr-1" />}
             {t}
           </button>
         ))}
@@ -97,10 +126,12 @@ export default function JobsPage() {
       ) : filtered.length === 0 ? (
         <EmptyState
           icon={<Briefcase width={36} height={36} />}
-          title={jobs.length === 0 ? "No jobs yet" : "No matches"}
+          title={jobs.length === 0 ? "No jobs yet" : filter === "Saved" ? "No saved jobs" : "No matches"}
           description={jobs.length === 0
             ? "Be the first to post a role for the Policy BootCamp network."
-            : "Try a different search or filter."}
+            : filter === "Saved"
+              ? "Bookmark jobs to see them here."
+              : "Try a different search or filter."}
           action={jobs.length === 0 ? <Link href="/post"><span className="text-saffron-700 font-bold text-sm">Post the first job →</span></Link> : undefined}
         />
       ) : (

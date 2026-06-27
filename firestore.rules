@@ -84,13 +84,17 @@ service cloud.firestore {
       // Creation: active members, must stamp themselves as the poster.
       allow create: if isActive()
                     && request.resource.data.postedBy == uid()
-                    && request.resource.data.status in ['open', 'closed'];
+                    && request.resource.data.status in ['open', 'closed', 'archived']
+                    && request.resource.data.expiresAt is number;
       // Owner edits status/fields; admin may also.
       // Any active user may increment applicantCount (used by submitApplication).
+      // Allow poster/admin to change status to archived and set archivedAt.
       allow update: if isActive() &&
                     ( (resource.data.postedBy == uid() && request.resource.data.postedBy == uid())
                       || isAdmin()
-                      || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['applicantCount']) );
+                      || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['applicantCount'])
+                      || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'archivedAt'])
+                        && request.resource.data.status in ['open', 'closed', 'archived'] );
       allow delete: if isActive() && (resource.data.postedBy == uid() || isAdmin());
 
       // ── jobs/{jobId}/applications/{applicantId} ────────────────────────
@@ -106,11 +110,24 @@ service cloud.firestore {
                       && applicantId == uid()
                       && request.resource.data.applicantId == uid();
         // Update check uses get() — fine for single-doc writes.
+        // Allow poster/admin to update status; allow applicant to withdraw (set to withdrawn)
         allow update: if isActive() &&
                       ( get(/databases/$(database)/documents/jobs/$(jobId)).data.postedBy == uid()
-                        || isAdmin() );
+                        || isAdmin()
+                        || (applicantId == uid()
+                            && request.resource.data.status == 'withdrawn'
+                            && resource.data.status in ['submitted', 'reviewing']) );
         allow delete: if isAdmin();
       }
+
+    }
+
+    // ── Saved Jobs: users/{userId}/savedJobs/{jobId} ──────────────────────
+    match /users/{userId}/savedJobs/{jobId} {
+      allow read:   if isActive() && (request.auth.uid == userId || isAdmin());
+      allow create: if isActive() && request.auth.uid == userId
+                    && request.resource.data.jobId == jobId;
+      allow delete: if isActive() && request.auth.uid == userId;
     }
 
     // ── applications/{appId} ─────────────────────────────────────────────
@@ -120,9 +137,13 @@ service cloud.firestore {
       allow read:   if isActive() && resource.data.postedBy == uid();
       allow read:   if isAdmin();
       allow create: if isActive() && request.resource.data.applicantId == uid();
+      // Allow poster/admin to update status; allow applicant to withdraw (set to withdrawn)
       allow update: if isActive() && (
         isAdmin()
         || get(/databases/$(database)/documents/jobs/$(resource.data.jobId)).data.postedBy == uid()
+        || (resource.data.applicantId == uid()
+            && request.resource.data.status == 'withdrawn'
+            && resource.data.status in ['submitted', 'reviewing'])
       );
       allow delete: if isAdmin();
     }

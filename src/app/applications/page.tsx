@@ -9,26 +9,36 @@ import { Badge } from "@/components/ui/Badge";
 import { Spinner } from "@/components/ui/Spinner";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
-import { Check, Inbox, Briefcase } from "@/components/icons";
-import { fetchMyApplications } from "@/lib/jobs-api";
+import { Check, Inbox, Briefcase, X } from "@/components/icons";
+import { fetchMyApplications, withdrawApplication } from "@/lib/jobs-api";
 import { useAuth } from "@/lib/auth-context";
+import { useToast } from "@/components/ui/Toaster";
 import { timeAgo, applicationStatusTone } from "@/lib/utils";
 import type { Application } from "@/lib/types";
-
-const statusAccent: Record<string, "saffron" | "navy" | "green" | "red"> = {
-  submitted: "saffron",
-  reviewing: "navy",
-  accepted: "green",
-  rejected: "red",
-};
 
 function ApplicationsInner() {
   const search = useSearchParams();
   const router = useRouter();
   const { profile } = useAuth();
+  const { toast } = useToast();
   const [apps, setApps] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const justApplied = search.get("applied") === "1";
+
+  const canWithdraw = (status: string) => status === "submitted" || status === "reviewing";
+
+  const handleWithdraw = async (app: Application) => {
+    if (!confirm("Withdraw your application? This cannot be undone.")) return;
+    const prevStatus = app.status;
+    setApps((a) => a.map((x) => (x.id === app.id ? { ...x, status: "withdrawn" as const } : x)));
+    try {
+      await withdrawApplication(app.jobId, app.applicantId, app.postedBy);
+      toast("Application withdrawn", "success");
+    } catch {
+      setApps((a) => a.map((x) => (x.id === app.id ? { ...x, status: prevStatus } : x)));
+      toast("Failed to withdraw", "error");
+    }
+  };
 
   useEffect(() => {
     if (!profile) return;
@@ -75,7 +85,7 @@ function ApplicationsInner() {
         <div className="space-y-3">
           {apps.map((app) => (
             <Link key={app.id} href={`/jobs/${app.jobId}`}>
-              <Card accent={statusAccent[app.status] ?? "saffron"} interactive>
+              <Card accent={applicationStatusTone[app.status]} interactive>
                 <div className="p-4 pl-5">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
@@ -84,7 +94,19 @@ function ApplicationsInner() {
                         <Briefcase width={12} height={12} className="shrink-0" /> {app.organisation}
                       </p>
                     </div>
-                    <Badge tone={applicationStatusTone[app.status]} dot>{app.status}</Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge tone={applicationStatusTone[app.status]} dot>{app.status}</Badge>
+                      {canWithdraw(app.status) && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-600 hover:bg-red-50"
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleWithdraw(app); }}
+                        >
+                          <X width={14} height={14} /> Withdraw
+                        </Button>
+                      )}
+                    </div>
                   </div>
                   <p className="text-xs text-navy-400 mt-2 font-medium">Applied {timeAgo(app.createdAt)}</p>
                 </div>

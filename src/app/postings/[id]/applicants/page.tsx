@@ -14,14 +14,7 @@ import type { Application, ApplicationStatus } from "@/lib/types";
 import { timeAgo, applicationStatusTone } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
-const STATUSES: ApplicationStatus[] = ["submitted", "reviewing", "accepted", "rejected"];
-
-const statusAccent: Record<ApplicationStatus, "saffron" | "navy" | "green" | "red"> = {
-  submitted: "saffron",
-  reviewing: "navy",
-  accepted: "green",
-  rejected: "red",
-};
+const STATUSES: ApplicationStatus[] = ["submitted", "reviewing", "accepted", "rejected", "withdrawn"];
 
 export default function ApplicantsPage() {
   const params = useParams<{ id: string }>();
@@ -82,7 +75,7 @@ export default function ApplicantsPage() {
       ) : (
         <div className="space-y-3">
           {apps.map((app) => (
-            <Card key={app.id} accent={statusAccent[app.status]}>
+            <Card key={app.id} accent={applicationStatusTone[app.status]}>
               <div className="p-4 pl-5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">

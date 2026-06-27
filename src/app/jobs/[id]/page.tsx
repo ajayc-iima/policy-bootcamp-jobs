@@ -8,8 +8,9 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
-import { ArrowLeft, Briefcase, ExternalLink, Inbox, MapPin, Clock, User, Building, Globe, Calendar } from "@/components/icons";
-import { fetchJob, fetchApplicationCount } from "@/lib/jobs-api";
+import { useToast } from "@/components/ui/Toaster";
+import { ArrowLeft, Briefcase, ExternalLink, Inbox, MapPin, Clock, User, Building, Globe, Calendar, Bookmark, BookmarkFilled } from "@/components/icons";
+import { fetchJob, fetchApplicationCount, isJobSaved, saveJob, unsaveJob } from "@/lib/jobs-api";
 import { formatDate, workModeTone } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 import type { Job } from "@/lib/types";
@@ -18,15 +19,27 @@ export default function JobDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { profile } = useAuth();
+  const { toast } = useToast();
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [appCount, setAppCount] = useState<number | null>(null);
+  const [saved, setSaved] = useState(false);
+  const [checkingSaved, setCheckingSaved] = useState(true);
 
   useEffect(() => {
     fetchJob(params.id)
-      .then(setJob)
-      .finally(() => setLoading(false));
-  }, [params.id]);
+      .then(async (j) => {
+        setJob(j);
+        if (j && profile) {
+          const isSaved = await isJobSaved(profile.uid, j.id);
+          setSaved(isSaved);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+        setCheckingSaved(false);
+      });
+  }, [params.id, profile]);
 
   useEffect(() => {
     if (!job || !profile || profile.uid !== job.postedBy) return;
@@ -47,6 +60,24 @@ export default function JobDetailPage() {
 
   const isOwner = profile?.uid === job.postedBy;
 
+  const toggleSave = async () => {
+    if (!job || !profile) return;
+    const nextSaved = !saved;
+    setSaved(nextSaved);
+    try {
+      if (nextSaved) {
+        await saveJob(profile.uid, job);
+        toast("Saved", "success");
+      } else {
+        await unsaveJob(profile.uid, job.id);
+        toast("Removed from saved", "success");
+      }
+    } catch {
+      setSaved(saved);
+      toast("Failed to update", "error");
+    }
+  };
+
   return (
     <AppShell>
       <button onClick={() => router.back()} className="inline-flex items-center gap-1.5 text-sm text-navy-500 hover:text-navy-800 mb-3 font-medium">
@@ -62,10 +93,27 @@ export default function JobDetailPage() {
           </div>
 
           <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-3">
-              <Badge tone={workModeTone[job.mode]} dot>{job.mode}</Badge>
-              <Badge tone="saffron">{job.type}</Badge>
-              {job.status === "closed" && <Badge tone="gray">Closed</Badge>}
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <div className="flex items-center gap-2">
+                <Badge tone={workModeTone[job.mode]} dot>{job.mode}</Badge>
+                <Badge tone="saffron">{job.type}</Badge>
+                {job.status === "closed" && <Badge tone="gray">Closed</Badge>}
+              </div>
+              {profile && !checkingSaved && !isOwner && job.status === "open" && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white hover:bg-white/10"
+                  onClick={toggleSave}
+                  aria-label={saved ? "Remove from saved" : "Save job"}
+                >
+                  {saved ? (
+                    <BookmarkFilled width={20} height={20} className="text-saffron-400" />
+                  ) : (
+                    <Bookmark width={20} height={20} className="text-navy-300" />
+                  )}
+                </Button>
+              )}
             </div>
             <h1 className="font-display text-3xl font-medium tracking-tight text-white leading-tight">{job.title}</h1>
             <p className="text-navy-300 mt-1.5 flex items-center gap-1.5 font-semibold text-sm">

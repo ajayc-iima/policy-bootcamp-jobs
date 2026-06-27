@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import type { ApplicationStatus, JobType, UserStatus, WorkMode } from "@/lib/types";
+import type { ApplicationStatus, JobStatus, JobType, UserStatus, WorkMode } from "@/lib/types";
 
 /** Merge Tailwind classes with conflict resolution. */
 export function cn(...inputs: ClassValue[]) {
@@ -45,12 +45,13 @@ export function isValidUrl(url: string): boolean {
 /** Badge tone for each application status. */
 export const applicationStatusTone: Record<
   ApplicationStatus,
-  "amber" | "navy" | "green" | "red"
+  "amber" | "navy" | "green" | "red" | "gray"
 > = {
   submitted: "amber",
   reviewing: "navy",
   accepted: "green",
   rejected: "red",
+  withdrawn: "gray",
 };
 
 /** Badge tone for each work mode. */
@@ -76,4 +77,11 @@ export const userStatusTone: Record<UserStatus, "amber" | "green" | "red" | "gra
   active: "green",
   suspended: "red",
   rejected: "gray",
+};
+
+/** Badge tone for each job status. */
+export const jobStatusTone: Record<JobStatus, "green" | "gray" | "amber"> = {
+  open: "green",
+  closed: "gray",
+  archived: "amber",
 };

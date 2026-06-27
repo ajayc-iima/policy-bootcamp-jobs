@@ -7,17 +7,19 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Spinner } from "@/components/ui/Spinner";
-import { ArrowLeft, Check } from "@/components/icons";
-import { fetchJob, hasApplied, submitApplication } from "@/lib/jobs-api";
+import { ArrowLeft, Check, X } from "@/components/icons";
+import { fetchJob, hasApplied, submitApplication, withdrawApplication } from "@/lib/jobs-api";
 import { firebaseError } from "@/lib/firebase-errors";
 import { isValidUrl } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
+import { useToast } from "@/components/ui/Toaster";
 import type { Job } from "@/lib/types";
 
 export default function ApplyPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { profile } = useAuth();
+  const { toast } = useToast();
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [alreadyApplied, setAlreadyApplied] = useState(false);
@@ -71,6 +73,18 @@ export default function ApplyPage() {
   );
 
   if (alreadyApplied) {
+    const handleWithdraw = async () => {
+      if (!job || !profile) return;
+      if (!confirm("Withdraw your application? This cannot be undone.")) return;
+      try {
+        await withdrawApplication(job.id, profile.uid, job.postedBy);
+        toast("Application withdrawn", "success");
+        router.replace("/applications");
+      } catch {
+        toast("Failed to withdraw", "error");
+      }
+    };
+
     return (
       <AppShell>
         <div className="text-center py-16">
@@ -81,9 +95,14 @@ export default function ApplyPage() {
           <p className="mt-2 text-sm text-navy-500 max-w-xs mx-auto">
             You already applied to <span className="font-medium text-navy-700">{job.title}</span>. The poster will reach out via your contact details.
           </p>
-          <Button variant="outline" className="mt-6" onClick={() => router.push("/applications")}>
-            View my applications
-          </Button>
+          <div className="mt-6 flex gap-3 justify-center">
+            <Button variant="outline" onClick={() => router.push("/applications")}>
+              View my applications
+            </Button>
+            <Button variant="danger" onClick={handleWithdraw}>
+              <X width={16} height={16} /> Withdraw
+            </Button>
+          </div>
         </div>
       </AppShell>
     );

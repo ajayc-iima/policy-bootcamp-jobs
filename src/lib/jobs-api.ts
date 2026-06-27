@@ -10,7 +10,7 @@ import {
   setDoc, updateDoc, deleteDoc, serverTimestamp, writeBatch, Timestamp, increment,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import type { Job, Application, ApplicationStatus, JobStatus } from "@/lib/types";
+import type { Job, Application, ApplicationStatus, JobStatus, SavedJob, NewJobInput } from "@/lib/types";
 
 function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
   return Promise.race([
@@ -36,13 +36,38 @@ export async function fetchOpenJobs(): Promise<Job[]> {
     orderBy("createdAt", "desc")
   );
   const snap = await getDocs(q);
-  return snap.docs.map((d) => parseJob(d.id, d.data() as Record<string, unknown>));
+  const jobs = snap.docs.map((d) => parseJob(d.id, d.data() as Record<string, unknown>));
+  
+  // Client-side fallback: filter expired and fire-and-forget update
+  const now = Date.now();
+  const validJobs = jobs.filter((j) => !j.expiresAt || j.expiresAt > now);
+  const expiredJobs = jobs.filter((j) => j.expiresAt && j.expiresAt <= now);
+  
+  if (expiredJobs.length > 0) {
+    const batch = writeBatch(db);
+    expiredJobs.forEach((j) => 
+      batch.update(doc(db, "jobs", j.id), { status: "closed", archivedAt: now })
+    );
+    batch.commit().catch(console.error);
+  }
+  
+  return validJobs;
 }
 
 export async function fetchJob(id: string): Promise<Job | null> {
   const snap = await getDoc(doc(db, "jobs", id));
   if (!snap.exists()) return null;
-  return parseJob(snap.id, snap.data() as Record<string, unknown>);
+  const job = parseJob(snap.id, snap.data() as Record<string, unknown>);
+  
+  // Client-side fallback: if expired but still open, update it
+  if (job.status === "open" && job.expiresAt && job.expiresAt <= Date.now()) {
+    const batch = writeBatch(db);
+    batch.update(doc(db, "jobs", id), { status: "closed", archivedAt: Date.now() });
+    batch.commit().catch(console.error);
+    return null; // Treat as not available
+  }
+  
+  return job;
 }
 
 export async function fetchJobsByPoster(uid: string): Promise<Job[]> {
@@ -53,12 +78,6 @@ export async function fetchJobsByPoster(uid: string): Promise<Job[]> {
   );
   const snap = await getDocs(q);
   return snap.docs.map((d) => parseJob(d.id, d.data() as Record<string, unknown>));
-}
-
-export interface NewJobInput {
-  title: string; organisation: string; type: Job["type"]; mode: Job["mode"];
-  location: string; salary?: string; description: string; externalLink?: string;
-  postedBy: string; postedByName: string; postedByEmail: string;
 }
 
 export async function createJob(input: NewJobInput): Promise<string> {
@@ -73,6 +92,10 @@ export async function createJob(input: NewJobInput): Promise<string> {
 
 export async function updateJobStatus(id: string, status: JobStatus) {
   await updateDoc(doc(db, "jobs", id), { status });
+}
+
+export async function updateJob(id: string, data: Partial<Omit<Job, "id" | "postedBy" | "postedByName" | "postedByEmail" | "createdAt" | "applicantCount">>) {
+  await updateDoc(doc(db, "jobs", id), data);
 }
 
 export async function deleteJob(id: string) {
@@ -182,4 +205,90 @@ export async function updateApplicationStatus(
   mirrorSnap.forEach((d) => batch.update(d.ref, { status }));
 
   await batch.commit();
+}
+
+/* ------------------------- SAVED JOBS -------------------------- */
+
+export async function saveJob(uid: string, job: Job): Promise<void> {
+  await setDoc(doc(db, "users", uid, "savedJobs", job.id), {
+    jobId: job.id,
+    jobTitle: job.title,
+    organisation: job.organisation,
+    savedAt: serverTimestamp(),
+  });
+}
+
+export async function unsaveJob(uid: string, jobId: string): Promise<void> {
+  await deleteDoc(doc(db, "users", uid, "savedJobs", jobId));
+}
+
+export async function fetchSavedJobs(uid: string): Promise<SavedJob[]> {
+  const q = query(
+    collection(db, "users", uid, "savedJobs"),
+    orderBy("savedAt", "desc")
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as SavedJob));
+}
+
+export async function isJobSaved(uid: string, jobId: string): Promise<boolean> {
+  const snap = await getDoc(doc(db, "users", uid, "savedJobs", jobId));
+  return snap.exists();
+}
+
+/* ------------------------- APPLICATION WITHDRAWAL --------------- */
+
+export async function withdrawApplication(
+  jobId: string,
+  applicantId: string,
+  postedBy: string
+): Promise<void> {
+  const batch = writeBatch(db);
+
+  // 1. Poster-facing copy (doc id = applicantId)
+  batch.update(doc(db, "jobs", jobId, "applications", applicantId), {
+    status: "withdrawn" as ApplicationStatus,
+  });
+
+  // 2. Applicant-facing mirror
+  const mirrorQuery = query(
+    collection(db, "applications"),
+    where("postedBy", "==", postedBy),
+    where("jobId", "==", jobId),
+    where("applicantId", "==", applicantId),
+  );
+  const mirrorSnap = await getDocs(mirrorQuery);
+  mirrorSnap.forEach((d) => batch.update(d.ref, { status: "withdrawn" }));
+
+  // 3. Decrement applicant counter
+  batch.update(doc(db, "jobs", jobId), { applicantCount: increment(-1) });
+
+  await batch.commit();
+}
+
+/* ------------------------- JOB ARCHIVAL ------------------------ */
+
+export async function fetchArchivedJobs(uid: string): Promise<Job[]> {
+  const q = query(
+    collection(db, "jobs"),
+    where("postedBy", "==", uid),
+    where("status", "==", "archived" as JobStatus),
+    orderBy("archivedAt", "desc")
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => parseJob(d.id, d.data() as Record<string, unknown>));
+}
+
+export async function archiveJob(id: string): Promise<void> {
+  await updateDoc(doc(db, "jobs", id), {
+    status: "archived" as JobStatus,
+    archivedAt: serverTimestamp(),
+  });
+}
+
+export async function restoreJob(id: string): Promise<void> {
+  await updateDoc(doc(db, "jobs", id), {
+    status: "open" as JobStatus,
+    archivedAt: null,
+  });
 }
